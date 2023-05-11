@@ -4,6 +4,8 @@ import router from './router'
 import axiosPlugin from './plugins/axiosPlugin'
 
 import './assets/main.css'
+import 'bootstrap/dist/js/bootstrap'
+import 'bootstrap/dist/css/bootstrap.min.css'
 
 const app = createApp(App)
 
