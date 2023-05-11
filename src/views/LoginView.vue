@@ -1,11 +1,17 @@
 <template>
     <form @submit.prevent="logIn">
         <h3>Log in</h3>
-        <label for="">Email:</label><br>
-        <input v-model="username" type="text"><br>
-        <label for="">Password:</label><br>
-        <input v-model="password" type="password"> <br><br>
-        <button type="submit">Log in</button>
+        <div class="mt-3">
+            <label class="form-label">Email:</label>
+            <input class="form-control" v-model="username" type="text">
+        </div>
+        <div class="mt-3">
+            <label class="form-label">Password:</label>
+            <input class="form-control" v-model="password" type="text" style="-webkit-text-security: disc;">
+        </div>
+        <div class="mt-4 d-flex justify-content-end">
+            <button type="submit" class="btn btn-primary">Log in</button>
+        </div>
     </form>
 </template>
 

@@ -2,7 +2,7 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">
         <a class="navbar-brand" href="#">Carpool</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler" type="button" v-if="!isLoggedIn" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
@@ -10,7 +10,7 @@
             <li class="nav-item">
             <a class="nav-link active" aria-current="page" href="#">Home</a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" data-bs-toggle="collapse" data-bs-target=".navbar-collapse.show">
             <a class="nav-link active" @click="logout" aria-current="page" href="#">Logout</a>
             </li>
         </ul>
@@ -22,9 +22,20 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 export default defineComponent({
+    computed: {
+        isLoggedIn() {
+            if (this.$route && this.$route.name) return (<string>this.$route.name).toLowerCase() == 'login';
+            return true
+        }
+    },
+    mounted() {
+        console.log(this.$route)
+    },
     methods: {
         logout() {
-            console.log("Logout!");
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem ('refreshToken');
+            this.$router.push({'name': 'Login'});
         }
     }
 })
