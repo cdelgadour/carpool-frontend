@@ -28,9 +28,6 @@ export default defineComponent({
             return true
         }
     },
-    mounted() {
-        console.log(this.$route)
-    },
     methods: {
         logout() {
             localStorage.removeItem('accessToken');

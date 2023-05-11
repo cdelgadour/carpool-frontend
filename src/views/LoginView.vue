@@ -19,7 +19,6 @@
 import { defineComponent } from 'vue';
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
-import Joi from 'joi'
 import type { LoginResponse } from '@/models/AuthModels';
 
 export default defineComponent({
