@@ -7,7 +7,7 @@
         </div>
         <div class="mt-3">
             <label class="form-label">Password:</label>
-            <input class="form-control" v-model="password" type="text" style="-webkit-text-security: disc;">
+            <input class="form-control" v-model="password" type="password" style="-webkit-text-security: disc;">
         </div>
         <div class="mt-4 d-flex justify-content-end">
             <button type="submit" class="btn btn-primary">Log in</button>
@@ -51,7 +51,6 @@ export default defineComponent({
                 username: this.username,
                 password: this.password
             };
-
             this.$axios.post('api/token/', data)
                 .then((res: LoginResponse) => {
                     localStorage.setItem('accessToken', res.data.access);
