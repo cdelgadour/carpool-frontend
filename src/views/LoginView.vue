@@ -18,9 +18,11 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { useVuelidate } from '@vuelidate/core'
-import { required } from '@vuelidate/validators'
+import { required, email } from '@vuelidate/validators'
 import Joi from 'joi'
 import type { LoginResponse } from '@/models/AuthModels';
+
+const emailValidation = (value: string) => value.endsWith("@unphu.edu.do")
 
 export default defineComponent({
     setup () {
@@ -34,7 +36,7 @@ export default defineComponent({
     },
     validations() {
         return {
-            username: { required },
+             username: { required }, //, email,emailValidation },
             password: { required }
         }
     },
@@ -44,7 +46,7 @@ export default defineComponent({
         }
     },
     methods: {
-        logIn() {
+        async logIn() {
             if (!this.isCompleted) return;
 
             const data = {

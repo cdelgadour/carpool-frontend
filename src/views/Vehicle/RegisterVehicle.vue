@@ -30,7 +30,11 @@
           <div class="col-md-6 ">
             <div class="m-1">
               <label class="form-label">Modelo</label>
-              <input class="form-control" v-model="model" type="text">
+              <select class="form-control" v-model="model" placeholder="Selecciona la marca del Vehiculo">
+                <option v-for="model in modelsList" :value="model">
+                  {{ model }}
+                </option>
+              </select>
             </div>
 
             <div class="m-1">
@@ -54,7 +58,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { useVuelidate } from '@vuelidate/core'
-import { required, minValue, maxValue, minLength, maxLength, not, sameAs, numeric } from '@vuelidate/validators'
+import { required, minValue, maxValue, minLength, maxLength, not, sameAs, numeric, between } from '@vuelidate/validators'
 export default defineComponent({
   setup() {
     return { v$: useVuelidate() }
@@ -65,6 +69,7 @@ export default defineComponent({
       plate: '',
       year: '',
       model: '',
+      modelsList: [],
       brandSelected: 0,
       brandOptions: [
         { text: 'Selecciona una marca', value: 0 },
@@ -80,12 +85,36 @@ export default defineComponent({
       plate: { required, minLength: minLength(7), maxLenght: maxLength(7) },
       brandSelected: { required, not: not(sameAs(0)) },
       year: {
-        required, numeric, minValue: minValue(2000), maxValue: maxValue(new Date().getFullYear()),
+        required, numeric, between: between(1999, new Date().getFullYear()),
         minLength: minLength(4), maxLenght: maxLength(4)
       },
     }
   },
   methods: {
+    async getModelsByBrand() {
+      const brand = this.brandOptions.find(x => x.value === this.brandSelected)?.text;
+
+      await this.$axios(`https://api.api-ninjas.com/v1/cars?limit=50&make=${brand}`, {
+        method: "GET",    
+        headers: {
+          "X-Api-Key": "UQAKcCOf5tgZSvN9xgLJEw==acQot96MSogkEvhD",
+        },
+        responseType: "json",
+      }).then((result) => {
+        const data = result.data;
+
+        try{
+          let brandModels = data.map((car: { model: any; }) => car.model);
+          this.modelsList = brandModels;
+        }
+        catch(error){
+          console.error("Error: ", error)
+        }
+
+      }).catch((error) => {
+        console.error("Error: ", error.responseText);
+      });
+    },
     async registerVehicle() {
 
       const isValid = await this.v$.$validate();
@@ -98,6 +127,11 @@ export default defineComponent({
         model: this.model,
         brand: this.brandSelected
       }
+    },
+  },
+  watch: {
+    brandSelected() {
+      this.getModelsByBrand();
     },
   }
 })
