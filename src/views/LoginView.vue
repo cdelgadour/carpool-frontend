@@ -46,7 +46,7 @@ export default defineComponent({
         }
     },
     methods: {
-        async logIn() {
+        logIn() {
             if (!this.isCompleted) return;
 
             const data = {

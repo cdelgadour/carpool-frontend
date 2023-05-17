@@ -2,7 +2,7 @@
     <h3>Main View</h3>
     <p>En construcción</p>
     <div class="mt-4">
-        <button @click="register()" type="submit" class="btn btn-primary">Registrar Vehiculo</button>
+        <button @click="register" type="submit" class="btn btn-primary">Registrar Vehiculo</button>
     </div>
 </template>
 
@@ -11,7 +11,7 @@ import { defineComponent } from 'vue';
 export default defineComponent({
     methods:{
         register(){
-            this.$router.push({'name': 'RegistrarVehiculo'});
+            this.$router.push({'name': 'RegisterVehicle'});
         }
     }
 })

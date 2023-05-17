@@ -20,6 +20,9 @@ const router = createRouter({
     {
       path: '/main',
       name: 'MainView',
+      meta: {
+        requiresAuth: true
+      },
       // route level code-splitting
       // this generates a separate chunk (About.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
@@ -27,7 +30,7 @@ const router = createRouter({
     },
     {
       path: '/vehicle/register',
-      name: 'RegistrarVehiculo',
+      name: 'RegisterVehicle',
       // route level code-splitting
       // this generates a separate chunk (About.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
@@ -42,6 +45,11 @@ const router = createRouter({
       component: NotFoundView
     },
   ]
+})
+
+router.beforeEach((to, from) => {
+  const isAuthenticated = localStorage.getItem('accessToken');
+  if (to.meta.requiresAuth && !isAuthenticated) return { name: 'Login' }
 })
 
 export default router
