@@ -71,7 +71,8 @@ export default defineComponent({
   computed: {
     ...mapGetters({
       brands: 'getVehicleBrands', 
-      models: 'getVehicleModels'
+      models: 'getVehicleModels',
+      user: 'getUserData'
     }),
     selectedModels() {
       if (this.vehicle.brand) return this.models.filter((model: Model) => model.brand == this.vehicle.brand);
@@ -101,10 +102,20 @@ export default defineComponent({
     },
     register() {
       if (this.isCompleted()) {
-        console.log(this.vehicle);
-        return
-        this.$store.dispatch('createVehicle', this.vehicle)
+        const data = {
+          ...this.vehicle,
+          driver: this.user.driver 
+        }
+
+        this.$store.dispatch('createVehicle', data);
+        this.clearData()
+        this.$router.push({'name': 'MainView'});
       }
+    },
+    clearData() {
+      this.vehicle = {} as Vehicle;
+      this.displayFieldError = false;
+      this.v$.$reset();
     }
   },
   mounted() {

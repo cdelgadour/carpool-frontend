@@ -4,6 +4,7 @@ import NotFoundView from '@/views/404View.vue'
 
 
 import RegisterVehicle from '@/views/Vehicle/RegisterVehicle.vue'
+import ListVehicles from '@/views/Vehicle/ListVehicles.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
 const router = createRouter({
@@ -29,8 +30,22 @@ const router = createRouter({
       component: MainView
     },
     {
+      path: '/vehicle/',
+      name: 'Vehicles',
+      meta: {
+        requiresAuth: true
+      },
+      // route level code-splitting
+      // this generates a separate chunk (About.[hash].js) for this route
+      // which is lazy-loaded when the route is visited.
+      component: ListVehicles
+    },
+    {
       path: '/vehicle/register',
       name: 'RegisterVehicle',
+      meta: {
+        requiresAuth: true
+      },
       // route level code-splitting
       // this generates a separate chunk (About.[hash].js) for this route
       // which is lazy-loaded when the route is visited.

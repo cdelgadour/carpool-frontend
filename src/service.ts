@@ -22,6 +22,7 @@ export default class APIService {
                 localStorage.removeItem('refreshToken');
                 router.push({ name: 'Login' })
             }
+            return Promise.reject(error);
         });
     }
 

@@ -11,6 +11,9 @@
             <a class="nav-link active" aria-current="page" href="#">Home</a>
             </li>
             <li class="nav-item" data-bs-toggle="collapse" data-bs-target=".navbar-collapse.show">
+            <a class="nav-link active" @click="goToRoute('Vehicles')" aria-current="page" href="#">Mis vehículos</a>
+            </li>
+            <li class="nav-item" data-bs-toggle="collapse" data-bs-target=".navbar-collapse.show">
             <a class="nav-link active" @click="logout" aria-current="page" href="#">Logout</a>
             </li>
         </ul>
@@ -29,6 +32,9 @@ export default defineComponent({
         }
     },
     methods: {
+        goToRoute(route: string) {
+            this.$router.push({'name': route});
+        },
         logout() {
             localStorage.removeItem('accessToken');
             localStorage.removeItem ('refreshToken');

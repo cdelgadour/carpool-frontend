@@ -15,3 +15,9 @@ export interface Vehicle {
     model: string,
     brand: string
 }
+
+export interface LoggedInUser {
+    id: string,
+    driver: string,
+    email: string
+}
