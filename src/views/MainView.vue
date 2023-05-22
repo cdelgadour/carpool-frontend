@@ -8,13 +8,15 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import axios from 'axios';
 export default defineComponent({
     methods:{
         register(){
             this.$router.push({'name': 'RegisterVehicle'});
         },
     },
+    mounted() {
+        this.$store.dispatch('getUserData');
+    }
 })
 </script>
 

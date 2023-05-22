@@ -21,3 +21,11 @@ export interface LoggedInUser {
     driver: string,
     email: string
 }
+
+export interface Rate {
+    trip_detail: string,
+    rate: string,
+    comment: string,
+    date: string,
+    status: string
+}

@@ -1,6 +1,5 @@
-import axios from 'axios';
 import { createStore, type ActionContext } from 'vuex'
-import type { Brand, LoggedInUser, Model, Vehicle } from './models/CommonModels';
+import type { Brand, LoggedInUser, Model, Vehicle, Rate } from './models/CommonModels';
 import APIService from './service';
 import DriverService from './services/vehicle.service';
 
@@ -8,7 +7,8 @@ interface AppState {
     brands: Brand[],
     models: Model[],
     user: LoggedInUser,
-    vehicles: Vehicle[]
+    vehicles: Vehicle[],
+    driverRates: Rate[] 
 }
 
 const apiService = new APIService();
@@ -20,7 +20,8 @@ export default createStore({
             brands: [],
             models: [],
             user: {} as LoggedInUser,
-            vehicles: [] 
+            vehicles: [],
+            driverRates: []
         } as AppState
     },
     getters: {
@@ -35,6 +36,9 @@ export default createStore({
         },
         getUserData(state) : LoggedInUser {
             return state.user
+        },
+        getDriverRates(state) : Rate[] {
+            return state.driverRates
         },
     },
     mutations: {
@@ -52,6 +56,9 @@ export default createStore({
         },
         SET_USER_DATA(state: AppState, data: LoggedInUser) {
             state.user = data
+        },
+        GET_DRIVER_RATES(state: AppState, data: Rate[]) {
+            state.driverRates = data
         }
     },
     actions: {
@@ -91,6 +98,28 @@ export default createStore({
             try {
                 let response = await apiService.post('api/vehicles/', data)
                 context.commit('ADD_NEW_VEHICLE', response.data)
+            } catch (error) {
+                console.log(error)
+            }            
+        },
+        async getDriverRates(context: ActionContext<AppState, AppState>) {
+            const driverId = context.state.user.driver;
+
+            try {
+                let response = await apiService.get(`api/driver/${driverId}/rates/`)
+                console.log(response.data);
+                context.commit('GET_DRIVER_RATES', response.data)
+            } catch (error) {
+                console.log(error)
+            }            
+        },
+        async getDriverPayments(context: ActionContext<AppState, AppState>) {
+            const driverId = context.state.user.driver;
+
+            try {
+                let response = await apiService.get(`api/driver/${driverId}/payments/`)
+                console.log(response.data);
+                // context.commit('GET_DRIVER_RATES', response.data)
             } catch (error) {
                 console.log(error)
             }            
