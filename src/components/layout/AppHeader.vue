@@ -14,6 +14,12 @@
             <a class="nav-link active" @click="goToRoute('Vehicles')" aria-current="page" href="#">Mis vehículos</a>
             </li>
             <li class="nav-item" data-bs-toggle="collapse" data-bs-target=".navbar-collapse.show">
+            <a class="nav-link active" @click="goToRoute('DriverPayments')" aria-current="page" href="#">Pagos</a>
+            </li>
+            <li class="nav-item" data-bs-toggle="collapse" data-bs-target=".navbar-collapse.show">
+            <a class="nav-link active" @click="goToRoute('UserRates')" aria-current="page" href="#">Reseñas</a>
+            </li>
+            <li class="nav-item" data-bs-toggle="collapse" data-bs-target=".navbar-collapse.show">
             <a class="nav-link active" @click="logout" aria-current="page" href="#">Logout</a>
             </li>
         </ul>

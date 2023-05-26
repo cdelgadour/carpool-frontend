@@ -6,14 +6,27 @@ export interface Brand {
 export interface Model {
     id: number,
     name: string,
-    brand: string
+    brand: number
 }
 
-export interface Vehicle {
+export interface VehicleRead {
     plate: string,
     year: string,
-    model: string,
-    brand: string
+    model: Model,
+    brand: Brand,
+    created_at: string,
+    color: string,
+    seats: string
+}
+
+export interface VehicleWrite {
+    plate: string,
+    year: string,
+    model: Model,
+    brand: Brand,
+    created_at: string,
+    color: string,
+    seats: string
 }
 
 export interface LoggedInUser {
@@ -28,4 +41,9 @@ export interface Rate {
     comment: string,
     date: string,
     status: string
+}
+
+export interface Payments {
+    amount: string
+    payment_date: string
 }

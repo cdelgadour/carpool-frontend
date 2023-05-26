@@ -3,8 +3,12 @@ import MainView from '@/views/MainView.vue'
 import NotFoundView from '@/views/404View.vue'
 
 
+import DriverPayments from '@/views/Payments/DriverPayments.vue'
+
 import RegisterVehicle from '@/views/Vehicle/RegisterVehicle.vue'
 import ListVehicles from '@/views/Vehicle/ListVehicles.vue'
+
+import UserRates from '@/views/Rates/UserRates.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
 const router = createRouter({
@@ -50,6 +54,28 @@ const router = createRouter({
       // this generates a separate chunk (About.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
       component: RegisterVehicle
+    },
+    {
+      path: '/payments',
+      name: 'DriverPayments',
+      meta: {
+        requiresAuth: true
+      },
+      // route level code-splitting
+      // this generates a separate chunk (About.[hash].js) for this route
+      // which is lazy-loaded when the route is visited.
+      component: DriverPayments
+    },
+    {
+      path: '/rates',
+      name: 'UserRates',
+      meta: {
+        requiresAuth: true
+      },
+      // route level code-splitting
+      // this generates a separate chunk (About.[hash].js) for this route
+      // which is lazy-loaded when the route is visited.
+      component: UserRates
     },
     {
       path: '/:catchAll(.*)',

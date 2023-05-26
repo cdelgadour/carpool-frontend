@@ -1,5 +1,5 @@
 import { createStore, type ActionContext } from 'vuex'
-import type { Brand, LoggedInUser, Model, Vehicle, Rate } from './models/CommonModels';
+import type { Brand, LoggedInUser, Model, VehicleWrite, VehicleRead, Rate, Payments } from './models/CommonModels';
 import APIService from './service';
 import DriverService from './services/vehicle.service';
 
@@ -7,8 +7,10 @@ interface AppState {
     brands: Brand[],
     models: Model[],
     user: LoggedInUser,
-    vehicles: Vehicle[],
-    driverRates: Rate[] 
+    vehiclesWrite: VehicleWrite[],
+    vehiclesRead: VehicleRead[],
+    driverRates: Rate[],
+    driverPayments: Payments[]
 }
 
 const apiService = new APIService();
@@ -20,8 +22,10 @@ export default createStore({
             brands: [],
             models: [],
             user: {} as LoggedInUser,
-            vehicles: [],
-            driverRates: []
+            vehiclesWrite: [],
+            vehiclesRead: [],
+            driverRates: [],
+            driverPayments: []
         } as AppState
     },
     getters: {
@@ -31,14 +35,17 @@ export default createStore({
         getVehicleModels(state) : Model[] {
             return state.models
         },
-        getUserVehicles(state) : Vehicle[] {
-            return state.vehicles
+        getUserVehicles(state) : VehicleRead[] {
+            return state.vehiclesRead
         },
         getUserData(state) : LoggedInUser {
             return state.user
         },
         getDriverRates(state) : Rate[] {
             return state.driverRates
+        },
+        getDriverPayments(state) : Payments[] {
+            return state.driverPayments
         },
     },
     mutations: {
@@ -48,17 +55,20 @@ export default createStore({
         SET_VEHICLE_MODELS(state: AppState, data: Model[]) {
             state.models = data
         },
-        GET_USER_VEHICLES(state: AppState, data: Vehicle[]) {
-            state.vehicles = data
+        GET_USER_VEHICLES(state: AppState, data: VehicleRead[]) {
+            state.vehiclesRead = data
         },
-        ADD_NEW_VEHICLE(state: AppState, data: Vehicle) {
-            state.vehicles.push(data)
+        ADD_NEW_VEHICLE(state: AppState, data: VehicleWrite) {
+            state.vehiclesWrite.push(data)
         },
         SET_USER_DATA(state: AppState, data: LoggedInUser) {
             state.user = data
         },
         GET_DRIVER_RATES(state: AppState, data: Rate[]) {
             state.driverRates = data
+        },
+        GET_DRIVER_PAYMENTS(state: AppState, data: Payments[]) {
+            state.driverPayments = data
         }
     },
     actions: {
@@ -94,7 +104,7 @@ export default createStore({
                 console.log(error)
             }            
         },
-        async createVehicle(context: ActionContext<AppState, AppState>, data: Vehicle) {
+        async createVehicle(context: ActionContext<AppState, AppState>, data: VehicleWrite) {
             try {
                 let response = await apiService.post('api/vehicles/', data)
                 context.commit('ADD_NEW_VEHICLE', response.data)
@@ -114,12 +124,10 @@ export default createStore({
             }            
         },
         async getDriverPayments(context: ActionContext<AppState, AppState>) {
-            const driverId = context.state.user.driver;
-
+            const driverId = 1;
             try {
                 let response = await apiService.get(`api/driver/${driverId}/payments/`)
-                console.log(response.data);
-                // context.commit('GET_DRIVER_RATES', response.data)
+                context.commit('GET_DRIVER_PAYMENTS', response.data)
             } catch (error) {
                 console.log(error)
             }            
