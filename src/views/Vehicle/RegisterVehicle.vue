@@ -15,7 +15,7 @@
             <div class="m-1">
               <label class="form-label">Marca</label>
               <select class="form-control" v-model="vehicle.brand" placeholder="Selecciona la marca del Vehiculo">
-                <option v-for="brand in brands" :value="brand" :key="brand.id">
+                <option v-for="brand in brands" :value="brand.id" :key="brand.id">
                   {{ brand.name }}
                 </option>
               </select>
@@ -24,7 +24,7 @@
               <div class="m-1">
                 <label class="form-label">Modelo</label>
                 <select class="form-control" v-model="vehicle.model" placeholder="Selecciona la marca del Vehiculo">
-                  <option v-for="model in selectedModels" :value="model" :key="model.id">
+                  <option v-for="model in selectedModels" :value="model.id" :key="model.id">
                     {{ model.name }}
                   </option>
                 </select>
@@ -150,7 +150,7 @@ export default defineComponent({
 
         this.$store.dispatch('createVehicle', data);
         this.clearData()
-        this.$router.push({ 'name': 'Vehicles' });
+        setTimeout(() => this.$router.push({ 'name': 'Vehicles' }), 500);
       }
     },
     clearData() {

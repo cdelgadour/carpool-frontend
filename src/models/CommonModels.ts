@@ -22,8 +22,8 @@ export interface VehicleRead {
 export interface VehicleWrite {
     plate: string,
     year: string,
-    model: Model,
-    brand: Brand,
+    model: string,
+    brand: string,
     created_at: string,
     color: string,
     seats: string

@@ -7,7 +7,7 @@
         <div class="col-md-6 text-start align-items-center">
           <hr />
           <div class="my-1">
-            <p>{{ vehicle.brand.name }} {{ vehicle.model.name }}</p>
+            <p>{{ vehicle.brand ? vehicle.brand.name : '' }} {{ vehicle.model ? vehicle.model.name : ''}}</p>
             <p>{{ vehicles.plate }}</p>
           </div>
         </div>
