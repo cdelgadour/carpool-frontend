@@ -108,7 +108,7 @@ export default class APIService {
         }
 
         // // return Axios({ method: 'post', url: this.apiUrl + action, headers: headers })
-        return this.$http.patch(this.apiURL + action + id, body);
+        return this.$http.patch(this.apiURL + action + id + '/', body);
     }
 
     public async delete<T extends Object,RT>(action: string, id: string, files?: any): Promise<AxiosResponse<BaseServiceResponse<RT>>> {

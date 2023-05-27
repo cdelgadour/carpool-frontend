@@ -8,7 +8,7 @@
           <div class="col-md-6">
             <div class="m-1">
               <label class="form-label">Placa</label>
-              <input class="form-control" v-model="vehicle.plate" type="text">
+              <input class="form-control" v-model="vehicle.plate" @input="convertToUpperCase" type="text" :disabled="buttonMsg === 'Actualizar'">
               <span class="text-danger" v-if="displayFieldError && v$.vehicle.plate.$invalid">La placa debe ser de 7
                 caracteres.</span>
             </div>
@@ -61,10 +61,9 @@
               <span class="text-danger" v-if="displayFieldError && v$.vehicle.seats.$invalid">Campo requerido.</span>
             </div>
 
-
           </div>
           <div class="d-flex flex-row-reverse mt-3">
-            <button type="submit" class="btn btn-primary">Registrar</button>
+            <button type="submit" class="btn btn-primary">{{ buttonMsg }}</button>
           </div>
         </div>
       </div>
@@ -78,25 +77,32 @@ import { defineComponent } from 'vue';
 import { useVuelidate } from '@vuelidate/core'
 import { required, minLength, maxLength, numeric, between, alpha } from '@vuelidate/validators'
 import { mapGetters } from 'vuex';
-import type { Model, VehicleWrite, Brand } from '@/models/CommonModels';
-import { number } from 'joi';
+import type { Model, VehicleWrite, Brand, VehicleRead } from '@/models/CommonModels';
+import { bool, number, string } from 'joi';
 
 export default defineComponent({
   setup() {
     return { v$: useVuelidate() }
   },
+  props: {
+    vehicleId: {
+      type: String,
+      required: false
+    }
+  },
   data() {
     return {
       vehicle: {} as VehicleWrite,
+      buttonMsg: 'Registrar',
       displayFieldError: false,
       colorOptions: [
-         "Rojo",
-         "Azul",
-         "Verde",
-         "Amarillo",
-         "Negro",
-         "Blanco",
-         "Gris"
+        "Rojo",
+        "Azul",
+        "Verde",
+        "Amarillo",
+        "Negro",
+        "Blanco",
+        "Gris"
       ]
     }
   },
@@ -104,7 +110,8 @@ export default defineComponent({
     ...mapGetters({
       brands: 'getVehicleBrands',
       models: 'getVehicleModels',
-      user: 'getUserData'
+      user: 'getUserData',
+      vehicles: 'getUserVehicles',
     }),
     selectedModels() {
       if (this.vehicle.brand) {
@@ -112,7 +119,7 @@ export default defineComponent({
           if (typeof this.vehicle.brand == 'number') {
             return model.brand == this.vehicle.brand;
           }
-          return model.brand == this.vehicle.brand.id;
+          return model.brand.toString() == this.vehicle.brand;
         });
       }
       return [];
@@ -135,6 +142,9 @@ export default defineComponent({
     }
   },
   methods: {
+    convertToUpperCase() {
+      this.vehicle.plate = this.vehicle.plate.toUpperCase();
+    },
     isCompleted() {
       if (!this.isValid) {
         this.displayFieldError = true;
@@ -147,8 +157,8 @@ export default defineComponent({
           ...this.vehicle,
           driver: this.user.driver,
         }
-
-        this.$store.dispatch('createVehicle', data);
+        
+        this.buttonMsg !== 'Registrar' ?  this.$store.dispatch('updateVehicle', data) : this.$store.dispatch('createVehicle', data);
         this.clearData()
         setTimeout(() => this.$router.push({ 'name': 'Vehicles' }), 500);
       }
@@ -164,6 +174,30 @@ export default defineComponent({
     this.v$.$reset();
     this.$store.dispatch('fetchBrands');
     this.$store.dispatch('fetchModels');
+
+    if (this.vehicleId !== undefined) {
+      this.$store.dispatch('getUserVehicles');
+      var vehicleToEdit = this.vehicles.find((x: VehicleRead) => {
+        if (typeof this.vehicleId === 'string' && x.plate) {
+          return x.plate === this.vehicleId;
+        }
+        return null;
+      });
+
+      if (vehicleToEdit) {
+        this.vehicle = {
+          id: vehicleToEdit.id,
+          brand: vehicleToEdit.brand.id,
+          seats: vehicleToEdit.seats,
+          model: vehicleToEdit.model.id,
+          plate: vehicleToEdit.plate,
+          year: vehicleToEdit.year,
+          color: vehicleToEdit.color,
+          created_at: vehicleToEdit.created_at
+        };
+        this.buttonMsg = 'Actualizar'
+      }
+    }
   }
 })
 </script>

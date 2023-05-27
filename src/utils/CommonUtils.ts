@@ -16,4 +16,19 @@ export class CommonUtils {
             return '';
         }
     }
+    static getEnglishColor(spanishColor: string) {
+        const colorMap: { [key: string]: string } = {
+            'Azul': 'Blue',
+            'Rojo': 'Red',
+            'Verde': 'Green',
+            'Amarillo': 'Yellow',
+            'Negro': 'Black',
+            'Blanco': 'White',
+            'Gris': 'Gray'
+          };
+
+        let color = colorMap[spanishColor];
+        // Return the English color name based on the mapping
+        return color;
+      }
 }

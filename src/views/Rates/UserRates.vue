@@ -2,12 +2,12 @@
     <div>
         <h2>Reseñas</h2>
         <div v-if="!selectedRate">
-            <div class="card shadow-sm mb-2" v-for="rate in rates" :key="rate.id">
+            <div class="card shadow-sm mb-2" v-for="rate in driverRates" :key="rate.id">
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-md-6 text-start align-items-center">
                             <div class="m-1">
-                                <b>{{ rate.date }}</b>
+                                <b>{{ formatDate(rate.date) }}</b>
                                 <br />
                                 <i>"{{ rate.comment }}"</i>
                                 <div class="text-start">
@@ -31,11 +31,24 @@
                     <div class="row">
                         <div class="col-md-12 text-start">
                             <div class="m-1">
-                                <h3>{{ selectedRate.date }}</h3>
-                                <p>{{ selectedRate.comment }}</p>
+                                <h3>{{ formatDate(selectedRate.date) }}</h3>
+                                <i>"{{ selectedRate.comment }}"</i>
+                                <br/>
                                 <span v-for="r in selectedRate.rate">&#11088;</span>
+                                <hr />
+                                <p>Detalles del Viaje</p>
+                                <ul>
+                                    <li><b>Fecha de Inicio:</b> <label>{{ formatDate(selectedRate.trip.started_at)
+                                    }}</label></li>
+                                    <li><b>Fecha de Fin:</b> <label>{{ formatDate(selectedRate.trip.comleted_at) }}</label>
+                                    </li>
+                                    <li><b>Tipo de Viaje:</b> <label>{{ selectedRate.trip.trip_type == 1 ? 'Hacia la UNPHU'
+                                        : 'Desde la UNPHU' }}</label></li>
+                                </ul>
                             </div>
-                            <button class="btn btn-outline-dark btn-sm m-2" @click="goBack">Volver</button>
+                            <button class="btn btn-outline-dark btn-sm m-2" @click="goBack">
+                                <fa :icon="['fas', 'arrow-left']" />
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -48,15 +61,11 @@
 import { defineComponent } from 'vue';
 import type { Rate } from '@/models/CommonModels';
 import { mapGetters } from 'vuex';
+import { CommonUtils } from '@/utils/CommonUtils';
 
 export default defineComponent({
     data() {
         return {
-            rates: [
-                { id: 1, rate: 5, comment: 'excelente', date: '2023-02-31' },
-                { id: 2, rate: 1, comment: 'pone musica mala', date: '2022-04-21' },
-                { id: 3, rate: 4, comment: 'buen servicio', date: '2023-01-01' },
-            ],
             selectedRate: null as Rate | null
         };
     },
@@ -67,16 +76,18 @@ export default defineComponent({
         goBack() {
             this.selectedRate = null;
         },
+        formatDate(date: string) {
+            return CommonUtils.formatDate(date);
+        }
     },
-    // computed: {
-    //     ...mapGetters({
-    //         DriverRates: 'getDriverRates'
-    //     }),
-    // },
-    // mounted() {
-    //     this.$store.dispatch('getDriverRates');
-    //     console.log(this.$store)
-    // }
+    computed: {
+        ...mapGetters({
+            driverRates: 'getDriverRates'
+        }),
+    },
+    mounted() {
+        this.$store.dispatch('getDriverRates');
+    }
 });
 </script>
   

@@ -4,12 +4,13 @@ export interface Brand {
 }
 
 export interface Model {
-    id: number,
+    id: string,
     name: string,
     brand: number
 }
 
 export interface VehicleRead {
+    id: string,
     plate: string,
     year: string,
     model: Model,
@@ -20,6 +21,7 @@ export interface VehicleRead {
 }
 
 export interface VehicleWrite {
+    id: string,
     plate: string,
     year: string,
     model: string,
@@ -35,12 +37,28 @@ export interface LoggedInUser {
     email: string
 }
 
+export interface Trip {
+    avaible_seats: number,
+    comleted_at: string,
+    created_at: string,
+    created_by: number,
+    driver: number,
+    id: number,
+    started_at: string,
+    status: number,
+    trip_type: number,
+    updated_at: string,
+    updated_by: number
+}
+
 export interface Rate {
-    trip_detail: string,
+    trip: Trip,
     rate: string,
     comment: string,
     date: string,
-    status: string
+    status: string,
+    driver: number,
+    id: number
 }
 
 export interface Payments {

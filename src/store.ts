@@ -61,6 +61,12 @@ export default createStore({
         ADD_NEW_VEHICLE(state: AppState, data: VehicleWrite) {
             state.vehiclesWrite.push(data)
         },
+        UPDATE_VEHICLE(state: AppState, data: VehicleWrite) {
+            state.vehiclesWrite.push(data)
+        },
+        DELETE_VEHICLE(state: AppState, data: string) {
+            state.vehiclesWrite.filter((x) => x.id != data)
+        },
         SET_USER_DATA(state: AppState, data: LoggedInUser) {
             state.user = data
         },
@@ -108,6 +114,22 @@ export default createStore({
             try {
                 let response = await apiService.post('api/vehicles/', data)
                 context.commit('ADD_NEW_VEHICLE', response.data)
+            } catch (error) {
+                console.log(error)
+            }            
+        },
+        async updateVehicle(context: ActionContext<AppState, AppState>, data: VehicleWrite) {
+            try {
+                let response = await apiService.patch('api/vehicles/', data, data.id)
+                context.commit('UPDATE_VEHICLE', response.data)
+            } catch (error) {
+                console.log(error)
+            }            
+        },
+        async deleteVehicle(context: ActionContext<AppState, AppState>, data: string) {
+            try {
+                let response = await apiService.delete('api/vehicles/', data)
+                context.commit('DELETE_VEHICLE', data)
             } catch (error) {
                 console.log(error)
             }            

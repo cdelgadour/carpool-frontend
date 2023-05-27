@@ -45,7 +45,7 @@ const router = createRouter({
       component: ListVehicles
     },
     {
-      path: '/vehicle/register',
+      path: '/vehicle/register/:vehicleId?',
       name: 'RegisterVehicle',
       meta: {
         requiresAuth: true
@@ -53,7 +53,8 @@ const router = createRouter({
       // route level code-splitting
       // this generates a separate chunk (About.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
-      component: RegisterVehicle
+      component: RegisterVehicle,
+      props: true
     },
     {
       path: '/payments',
