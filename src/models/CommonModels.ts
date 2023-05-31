@@ -34,7 +34,15 @@ export interface VehicleWrite {
 export interface LoggedInUser {
     id: string,
     driver: string,
-    email: string
+    email: string,
+    driverRequest: string
+}
+
+export interface DriverRequests {
+    id: string,
+    user: LoggedInUser,
+    status: string,
+    decision: string
 }
 
 export interface Trip {

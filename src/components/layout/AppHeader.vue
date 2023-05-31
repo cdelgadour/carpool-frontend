@@ -11,6 +11,12 @@
             <a class="nav-link active" @click="goToRoute('MainView')" aria-current="page" href="#">Home</a>
             </li>
             <li class="nav-item" data-bs-toggle="collapse" data-bs-target=".navbar-collapse.show">
+            <a class="nav-link active" @click="goToRoute('Profile')" aria-current="page" href="#">Mi Perfil</a>
+            </li>
+            <li class="nav-item" data-bs-toggle="collapse" data-bs-target=".navbar-collapse.show">
+            <a class="nav-link active" @click="goToRoute('DriverRequests')" aria-current="page" href="#">Solicitudes de conductor</a>
+            </li>
+            <li class="nav-item" data-bs-toggle="collapse" data-bs-target=".navbar-collapse.show">
             <a class="nav-link active" @click="goToRoute('Vehicles')" aria-current="page" href="#">Mis vehículos</a>
             </li>
             <li class="nav-item" data-bs-toggle="collapse" data-bs-target=".navbar-collapse.show">

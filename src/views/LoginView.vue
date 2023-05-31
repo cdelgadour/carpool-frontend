@@ -1,6 +1,6 @@
 <template>
-    <form @submit.prevent="logIn">
-        <h3>Log in</h3>
+    <form @submit.prevent="action">
+        <h3>{{ isLogin ? 'Ingresar' : 'Registrarte' }}</h3>
         <div class="mt-3">
             <label class="form-label">Email:</label>
             <input class="form-control" v-model="username" type="text">
@@ -9,8 +9,9 @@
             <label class="form-label">Password:</label>
             <input class="form-control" v-model="password" type="password" style="-webkit-text-security: disc;">
         </div>
-        <div class="mt-4 d-flex justify-content-end">
-            <button type="submit" class="btn btn-primary">Log in</button>
+        <div class="mt-4 d-flex justify-content-between">
+            <a href="#" @click="isLogin = !isLogin">{{ isLogin ? 'No tengo cuenta' : 'Ya tengo cuenta'}}</a>
+            <button type="submit" class="btn btn-primary">{{ isLogin ? 'Ingresar' : 'Registrarte' }}</button>
         </div>
     </form>
 </template>
@@ -19,10 +20,7 @@
 import { defineComponent } from 'vue';
 import { useVuelidate } from '@vuelidate/core'
 import { required, email } from '@vuelidate/validators'
-import Joi from 'joi'
 import type { LoginResponse } from '@/models/AuthModels';
-
-const emailValidation = (value: string) => value.endsWith("@unphu.edu.do")
 
 export default defineComponent({
     setup () {
@@ -32,11 +30,12 @@ export default defineComponent({
         return {
             username: '',
             password: '',
+            isLogin: true
         }
     },
     validations() {
         return {
-             username: { required }, //, email,emailValidation },
+             username: { required },
             password: { required }
         }
     },
@@ -45,7 +44,13 @@ export default defineComponent({
             return !this.v$.$invalid;
         }
     },
+    mounted() {
+    },
     methods: {
+        action() {
+            if (this.isLogin) this.logIn();
+            else this.signUp();
+        },
         logIn() {
             if (!this.isCompleted) return;
 
@@ -62,6 +67,19 @@ export default defineComponent({
                 .catch(e => {
                     console.log(e);
                 })   
+        },
+        signUp() {
+            if (!this.isCompleted) return;
+
+            const data = {
+                username: this.username,
+                password: this.password
+            };
+            this.$axios.post('api/users/create_user/', data)
+                .then((res) => {
+                    if (res.status == 201) this.logIn();
+                })
+                .catch(err => console.log(err.response.data))
         }
     }
 })

@@ -1,5 +1,5 @@
 import { createStore, type ActionContext } from 'vuex'
-import type { Brand, LoggedInUser, Model, VehicleWrite, VehicleRead, Rate, Payments } from './models/CommonModels';
+import type { Brand, LoggedInUser, Model, VehicleWrite, VehicleRead, Rate, Payments, DriverRequests } from './models/CommonModels';
 import APIService from './service';
 import DriverService from './services/vehicle.service';
 
@@ -10,7 +10,8 @@ interface AppState {
     vehiclesWrite: VehicleWrite[],
     vehiclesRead: VehicleRead[],
     driverRates: Rate[],
-    driverPayments: Payments[]
+    driverPayments: Payments[],
+    driverRequests: DriverRequests[]
 }
 
 const apiService = new APIService();
@@ -25,7 +26,8 @@ export default createStore({
             vehiclesWrite: [],
             vehiclesRead: [],
             driverRates: [],
-            driverPayments: []
+            driverPayments: [],
+            driverRequests: []
         } as AppState
     },
     getters: {
@@ -46,6 +48,9 @@ export default createStore({
         },
         getDriverPayments(state) : Payments[] {
             return state.driverPayments
+        },
+        getDriverRequests(state) : DriverRequests[] {
+            return state.driverRequests
         },
     },
     mutations: {
@@ -75,6 +80,9 @@ export default createStore({
         },
         GET_DRIVER_PAYMENTS(state: AppState, data: Payments[]) {
             state.driverPayments = data
+        },
+        GET_DRIVER_REQUESTS(state: AppState, data: DriverRequests[]) {
+            state.driverRequests = data
         }
     },
     actions: {
@@ -132,6 +140,18 @@ export default createStore({
                 context.commit('DELETE_VEHICLE', data)
             } catch (error) {
                 console.log(error)
+            }
+        },
+        async requestAsDriver(context: ActionContext<AppState, AppState>, data: VehicleWrite) {
+            const userId = context.state.user.id;
+            console.log(userId);
+
+            try {
+                let response = await apiService.get(`api/users/${userId}/driver_request/`)
+                console.log(response);
+                // context.commit('ADD_NEW_VEHICLE', response.data)
+            } catch (error) {
+                console.log(error)
             }            
         },
         async getDriverRates(context: ActionContext<AppState, AppState>) {
@@ -150,6 +170,22 @@ export default createStore({
             try {
                 let response = await apiService.get(`api/driver/${driverId}/payments/`)
                 context.commit('GET_DRIVER_PAYMENTS', response.data)
+            } catch (error) {
+                console.log(error)
+            }            
+        },
+        async getDriverRequests(context: ActionContext<AppState, AppState>) {
+            try {
+                let response = await apiService.get(`api/admin/driver-requests/`)
+                context.commit('GET_DRIVER_REQUESTS', response.data)
+            } catch (error) {
+                console.log(error)
+            }            
+        },
+        async decideOnRequest(context: ActionContext<AppState, AppState>, data: { id: string, decision: string }) {
+            try {
+                let response = await apiService.patch(`api/admin/driver-requests/`, { decision: data.decision  }, data.id)
+                context.commit('GET_DRIVER_REQUESTS', response.data)
             } catch (error) {
                 console.log(error)
             }            
