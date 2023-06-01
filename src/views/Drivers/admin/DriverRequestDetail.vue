@@ -1,14 +1,14 @@
 <template>
     <div class="row">
         <button @click="goToDriverRequestList" class="btn btn-primary mb-3">Ir atrás</button>
-        <div class="card shadow-sm p-4">
+        <div class="card shadow-sm p-4" v-if="selectedRequest">
             <div class="col-md-12">
                 <h2>Solicitud #{{ selectedRequest.id }}</h2>
                 <p class="mb-0">Nombre: {{ selectedRequest.user.name }}</p>
                 <p>Correo: {{ selectedRequest.user.email }}</p>
-                <p>Matrícula:</p>
+                <p>Matrícula: {{ selectedRequest.user.university_id }}</p>
             </div>
-            <div class="row">
+            <div class="row" v-if="!isCompleted">
                 <div class="col">
                     <button @click="showModal('R')" class="w-100 btn btn-danger">Rechazar</button>
                 </div>
@@ -60,11 +60,15 @@ export default defineComponent({
             const selectedId = this.$route.params.id;
             if (this.driverRequests) return this.driverRequests.find((req: DriverRequests) => req.id == selectedId)
             return []
+        },
+        isCompleted() {
+            if (this.selectedRequest) return this.selectedRequest.decision != null;
+            return false;
         }
     },
     mounted() {
         const modalElement = document.getElementById('confirmModal');
-            if (modalElement instanceof Element) {
+            if (modalElement && modalElement instanceof Element) {
                 this.modalInstance = new Modal(modalElement)
             }
     },
@@ -85,9 +89,10 @@ export default defineComponent({
             this.hideModal();
             this.modalText = '';
             if (action) {
-                const data = { id: this.driverRequests.id, decision: this.decision == 'R' ? 1 : 2};
+                const data = { id: this.selectedRequest.id, decision: this.decision == 'R' ? 1 : 2};
+                this.$store.commit('SET_INTERRUPT_LOAD');
                 this.$store.dispatch('decideOnRequest', data);
-                this.goToDriverRequestList()
+                this.goToDriverRequestList();
             }
         },
         registerDriver(){

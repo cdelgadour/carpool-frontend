@@ -73,3 +73,8 @@ export interface Payments {
     amount: string
     payment_date: string
 }
+
+export interface NamedChoices {
+    id: string,
+    name: string
+}

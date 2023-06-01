@@ -4,6 +4,7 @@
         <div class="mt-3">
             <label class="form-label">Email:</label>
             <input class="form-control" v-model="username" type="text">
+            <p class="text-danger mb-0" v-if="errorMessage">{{  errorMessage  }}</p>
         </div>
         <div class="mt-3">
             <label class="form-label">Password:</label>
@@ -30,7 +31,8 @@ export default defineComponent({
         return {
             username: '',
             password: '',
-            isLogin: true
+            isLogin: true,
+            errorMessage: ''
         }
     },
     validations() {
@@ -79,7 +81,9 @@ export default defineComponent({
                 .then((res) => {
                     if (res.status == 201) this.logIn();
                 })
-                .catch(err => console.log(err.response.data))
+                .catch(err => {
+                    this.errorMessage = err.response.data.email[0]
+                })
         }
     }
 })

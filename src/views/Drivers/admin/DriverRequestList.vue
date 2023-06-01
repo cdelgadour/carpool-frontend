@@ -6,7 +6,8 @@
         <div class="col-md-6 text-start align-items-center">
           <div class="my-1">
             <p class="mb-0"><strong>Solicitud #{{ request.id }}</strong></p>
-            <p class="mb-0"><strong>Conductor</strong></p>
+            <p class="mb-0"><strong>Conductor {{ request.user.name }}</strong></p>
+            <p class="mb-0"><strong>Estado: {{ selectedDecisionChoice(request.decision) }}</strong></p>
             <p>Fecha: {{ formattedDate(request.created_at) }}</p>
           </div>
         </div>
@@ -23,7 +24,8 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { useVuelidate } from '@vuelidate/core'
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
+import type { NamedChoices } from '@/models/CommonModels';
 
 export default defineComponent({
     setup () {
@@ -36,10 +38,18 @@ export default defineComponent({
     },
     computed: {
         ...mapGetters({
-            driverRequests: 'getDriverRequests'
+            driverRequests: 'getDriverRequests',
+            requestDecisionChoices: 'getDriverDecisionChoices'
         }),
+        ...mapState({
+          interruptLoad: 'interruptGet'
+        })
     },
     methods: {
+        selectedDecisionChoice(id: string) {
+          if (id) return this.requestDecisionChoices.find((r: NamedChoices) => r.id == id).name;
+          return 'Pendiente'
+        },
         formattedDate(date: string) {
             return date.substring(0, 10);
         },
@@ -53,7 +63,11 @@ export default defineComponent({
         }
     },
     mounted() {
-        this.$store.dispatch('getDriverRequests');
+        if (this.interruptLoad) {
+          this.$store.commit('SET_INTERRUPT_LOAD')
+        } else {
+          this.$store.dispatch('getDriverRequests');
+        }
     }
 })
 </script>
