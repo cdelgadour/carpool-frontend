@@ -140,8 +140,10 @@ export default createStore({
             }
         },
         async getUserVehicles(context: ActionContext<AppState, AppState>) {
+            const driverId = context.state.user.driver;
+
             try {
-                let response = await apiService.get('api/vehicles/')
+                let response = await apiService.get(`api/driver/${driverId}/vehicles/`)
                 context.commit('GET_USER_VEHICLES', response.data)
             } catch (error) {
                 console.log(error)
@@ -167,6 +169,7 @@ export default createStore({
             try {
                 let response = await apiService.delete('api/vehicles/', data)
                 context.commit('DELETE_VEHICLE', data)
+
             } catch (error) {
                 console.log(error)
             }
@@ -185,14 +188,14 @@ export default createStore({
 
             try {
                 let response = await apiService.get(`api/driver/${driverId}/rates/`)
-                console.log(response.data);
                 context.commit('GET_DRIVER_RATES', response.data)
             } catch (error) {
                 console.log(error)
             }            
         },
         async getDriverPayments(context: ActionContext<AppState, AppState>) {
-            const driverId = 1;
+            const driverId = context.state.user.driver;
+            
             try {
                 let response = await apiService.get(`api/driver/${driverId}/payments/`)
                 context.commit('GET_DRIVER_PAYMENTS', response.data)

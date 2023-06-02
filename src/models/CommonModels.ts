@@ -17,7 +17,8 @@ export interface VehicleRead {
     brand: Brand,
     created_at: string,
     color: string,
-    seats: string
+    seats: string,
+    default_vehicle: boolean
 }
 
 export interface VehicleWrite {
@@ -28,7 +29,8 @@ export interface VehicleWrite {
     brand: string,
     created_at: string,
     color: string,
-    seats: string
+    seats: string,
+    default_vehicle: boolean
 }
 
 export interface LoggedInUser {

@@ -1,12 +1,18 @@
 <template>
   <div class="card shadow-sm p-4">
-    <h3 class="text-center mb-4">Registro de Vehiculo</h3>
+    <div class="row mb-3">
+      <div class="col-6">
+        <button class="btn btn-primary btn-sm" @click="goBack">
+          <fa :icon="['fas', 'arrow-left']" />
+        </button>
+      </div>
+    </div>
+    <h3 class="text-center mb-4">Registro de Vehículo</h3>
     <form @submit.prevent="register">
       <div class="container-fluid">
         <div class="row">
-
           <div class="col-md-6">
-            <div class="m-1">
+            <div class="m-1 mt-0">
               <label class="form-label">Placa</label>
               <input class="form-control" v-model="vehicle.plate" @input="convertToUpperCase" type="text" :disabled="buttonMsg === 'Actualizar'">
               <span class="text-danger" v-if="displayFieldError && v$.vehicle.plate.$invalid">La placa debe ser de 7
@@ -40,7 +46,7 @@
             <div class="m-1">
               <label class="form-label">Año</label>
               <input class="form-control" v-model="vehicle.year" type="text">
-              <span class="text-danger" v-if="displayFieldError && v$.vehicle.year.$invalid">Favor escribir un año valido
+              <span class="text-danger" v-if="displayFieldError && v$.vehicle.year.$invalid">Favor escribir un año válido
                 a partir del 1999 (YYYY)</span>
             </div>
 
@@ -61,6 +67,13 @@
               <span class="text-danger" v-if="displayFieldError && v$.vehicle.seats.$invalid">Campo requerido.</span>
             </div>
 
+            <div class="m-1 mt-3">
+              <div class="form-check">
+                <input class="form-check-input" v-model="vehicle.default_vehicle" type="checkbox" id="check1" name="option1" value="something" checked>
+                <label class="form-check-label">Vehículo por defecto</label>
+              </div>
+            </div>
+
           </div>
           <div class="d-flex flex-row-reverse mt-3">
             <button type="submit" class="btn btn-primary">{{ buttonMsg }}</button>
@@ -78,21 +91,14 @@ import { useVuelidate } from '@vuelidate/core'
 import { required, minLength, maxLength, numeric, between, alpha } from '@vuelidate/validators'
 import { mapGetters } from 'vuex';
 import type { Model, VehicleWrite, Brand, VehicleRead } from '@/models/CommonModels';
-import { bool, number, string } from 'joi';
 
 export default defineComponent({
   setup() {
     return { v$: useVuelidate() }
   },
-  props: {
-    vehicleId: {
-      type: String,
-      required: false
-    }
-  },
   data() {
     return {
-      vehicle: {} as VehicleWrite,
+      vehicle: { default_vehicle: false } as VehicleWrite,
       buttonMsg: 'Registrar',
       displayFieldError: false,
       colorOptions: [
@@ -145,6 +151,9 @@ export default defineComponent({
     convertToUpperCase() {
       this.vehicle.plate = this.vehicle.plate.toUpperCase();
     },
+    goBack() {
+      this.$router.push({ name: 'Vehicles' })
+    },
     isCompleted() {
       if (!this.isValid) {
         this.displayFieldError = true;
@@ -159,8 +168,11 @@ export default defineComponent({
         }
         
         this.buttonMsg !== 'Registrar' ?  this.$store.dispatch('updateVehicle', data) : this.$store.dispatch('createVehicle', data);
-        this.clearData()
-        setTimeout(() => this.$router.push({ 'name': 'Vehicles' }), 500);
+        
+        setTimeout(() => {
+          this.clearData();
+          this.$router.push({ 'name': 'Vehicles' });
+        }, 500);
       }
     },
     clearData() {
@@ -170,20 +182,11 @@ export default defineComponent({
     }
   },
   mounted() {
-    this.$store.dispatch('getUserData');
     this.v$.$reset();
-    this.$store.dispatch('fetchBrands');
-    this.$store.dispatch('fetchModels');
+    const vehicleId = this.$route.params.vehicleId;
 
-    if (this.vehicleId !== undefined) {
-      this.$store.dispatch('getUserVehicles');
-      var vehicleToEdit = this.vehicles.find((x: VehicleRead) => {
-        if (typeof this.vehicleId === 'string' && x.plate) {
-          return x.plate === this.vehicleId;
-        }
-        return null;
-      });
-
+    if (vehicleId) {
+      const vehicleToEdit = this.vehicles.find((x: VehicleRead) => x.plate == vehicleId);
       if (vehicleToEdit) {
         this.vehicle = {
           id: vehicleToEdit.id,
@@ -193,11 +196,13 @@ export default defineComponent({
           plate: vehicleToEdit.plate,
           year: vehicleToEdit.year,
           color: vehicleToEdit.color,
-          created_at: vehicleToEdit.created_at
+          created_at: vehicleToEdit.created_at,
+          default_vehicle: vehicleToEdit.default_vehicle
         };
         this.buttonMsg = 'Actualizar'
       }
     }
+    const vehicleToEdit = false;
   }
 })
 </script>

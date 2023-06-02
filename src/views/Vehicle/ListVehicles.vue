@@ -101,11 +101,10 @@ export default defineComponent({
       })
     },
     deleteVehicle(data: string) {
-      this.$store.dispatch('deleteVehicle', data)
-        .then(() => {
-          this.vehicles = [];
-        })
-      this.selectedVehicle = null;
+      this.$store.dispatch('deleteVehicle', data).then(() => {
+        this.$store.dispatch('getUserVehicles');
+        this.selectedVehicle = null;
+      })
     },
     confirmDeletion(id: string) {
       this.deleteVehicle(id);
@@ -139,14 +138,8 @@ export default defineComponent({
   },
   mounted() {
     this.$store.dispatch('getUserVehicles');
-  },
-  watch: {
-    vehicles: {
-      immediate: true,
-      handler() {
-        this.$store.dispatch('getUserVehicles');
-      },
-    },
+    this.$store.dispatch('fetchBrands');
+    this.$store.dispatch('fetchModels');
   }
 })
 </script>
