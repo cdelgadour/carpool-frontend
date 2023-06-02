@@ -8,9 +8,6 @@ import { defineComponent } from 'vue';
 export default defineComponent({
     methods:{
         
-    },
-    mounted() {
-        this.$store.dispatch('getUserData');
     }
 })
 </script>

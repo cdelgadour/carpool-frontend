@@ -35,7 +35,8 @@ export interface LoggedInUser {
     id: string,
     driver: string,
     email: string,
-    driverRequest: string
+    driverRequest: string,
+    is_admin: boolean
 }
 
 export interface DriverRequests {

@@ -27,23 +27,25 @@ interface AppState {
     interruptGet: boolean
 }
 
+const initialState = {
+    brands: [],
+    models: [],
+    user: {} as LoggedInUser,
+    vehiclesWrite: [],
+    vehiclesRead: [],
+    driverRates: [],
+    driverPayments: [],
+    driverRequests: [],
+    driverDecisionChoices: requestDecisions,
+    interruptGet: false
+} as AppState
+
 const apiService = new APIService();
 const driverService = new DriverService();
 
 export default createStore({
     state() {
-        return {
-            brands: [],
-            models: [],
-            user: {} as LoggedInUser,
-            vehiclesWrite: [],
-            vehiclesRead: [],
-            driverRates: [],
-            driverPayments: [],
-            driverRequests: [],
-            driverDecisionChoices: requestDecisions,
-            interruptGet: false
-        } as AppState
+        return {...initialState}
     },
     getters: {
         getVehicleBrands(state) : Brand[] {
@@ -70,8 +72,14 @@ export default createStore({
         getDriverDecisionChoices(state) : NamedChoices[] {
             return state.driverDecisionChoices
         },
+        getIsDriver(state) : boolean {
+            return state.user.driver != "" 
+        },
     },
     mutations: {
+        RESET_STATE(state: AppState) {
+            Object.assign(state, {...initialState})
+        },
         SET_VEHICLE_BRANDS(state: AppState, data: Brand[]) {
             state.brands = data
         },

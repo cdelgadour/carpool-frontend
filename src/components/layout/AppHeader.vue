@@ -13,13 +13,13 @@
             <li class="nav-item" data-bs-toggle="collapse" data-bs-target=".navbar-collapse.show">
             <a class="nav-link active" @click="goToRoute('Profile')" aria-current="page" href="#">Mi Perfil</a>
             </li>
-            <li class="nav-item" data-bs-toggle="collapse" data-bs-target=".navbar-collapse.show">
+            <li class="nav-item" v-if="showAdminRoutes" data-bs-toggle="collapse" data-bs-target=".navbar-collapse.show">
             <a class="nav-link active" @click="goToRoute('DriverRequests')" aria-current="page" href="#">Solicitudes de conductor</a>
             </li>
-            <li class="nav-item" data-bs-toggle="collapse" data-bs-target=".navbar-collapse.show">
+            <li class="nav-item" v-if="isDriver" data-bs-toggle="collapse" data-bs-target=".navbar-collapse.show">
             <a class="nav-link active" @click="goToRoute('Vehicles')" aria-current="page" href="#">Mis vehículos</a>
             </li>
-            <li class="nav-item" data-bs-toggle="collapse" data-bs-target=".navbar-collapse.show">
+            <li class="nav-item" v-if="isDriver || showAdminRoutes" data-bs-toggle="collapse" data-bs-target=".navbar-collapse.show">
             <a class="nav-link active" @click="goToRoute('DriverPayments')" aria-current="page" href="#">Pagos</a>
             </li>
             <li class="nav-item" data-bs-toggle="collapse" data-bs-target=".navbar-collapse.show">
@@ -36,8 +36,16 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import { mapGetters } from 'vuex';
 export default defineComponent({
     computed: {
+        ...mapGetters({
+            userData: 'getUserData',
+            isDriver: 'getIsDriver'
+        }),
+        showAdminRoutes() {
+            if (this.userData) return this.userData.is_admin
+        },
         isLoggedIn() {
             if (this.$route && this.$route.name) return (<string>this.$route.name).toLowerCase() == 'login';
             return true
@@ -50,6 +58,7 @@ export default defineComponent({
         logout() {
             localStorage.removeItem('accessToken');
             localStorage.removeItem ('refreshToken');
+            this.$store.commit("RESET_STATE");
             this.$router.push({'name': 'Login'});
         }
     }

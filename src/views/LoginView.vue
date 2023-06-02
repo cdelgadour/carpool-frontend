@@ -64,6 +64,7 @@ export default defineComponent({
                 .then((res: LoginResponse) => {
                     localStorage.setItem('accessToken', res.data.access);
                     localStorage.setItem('refreshToken', res.data.refresh);
+                    this.$store.dispatch('getUserData');
                     this.$router.push({'name': 'MainView'});
                 })
                 .catch(e => {

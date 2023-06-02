@@ -14,6 +14,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import ProfileView from '@/views/ProfileView.vue'
 import DriverRequestList from '@/views/Drivers/admin/DriverRequestList.vue'
 import DriverRequestDetail from '@/views/Drivers/admin/DriverRequestDetail.vue'
+import store from '@/store'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -67,7 +68,8 @@ const router = createRouter({
       path: '/admin/driver-request/:id',
       name: 'DriverRequestDetail',
       meta: {
-        requiresAuth: true
+        requiresAuth: true,
+        requiredAdmin: true
       },
       component: DriverRequestDetail
     },
@@ -75,7 +77,8 @@ const router = createRouter({
       path: '/admin/driver-request',
       name: 'DriverRequests',
       meta: {
-        requiresAuth: true
+        requiresAuth: true,
+        requiredAdmin: true
       },
       component: DriverRequestList
     },
@@ -98,6 +101,15 @@ const router = createRouter({
 router.beforeEach((to, from) => {
   const isAuthenticated = localStorage.getItem('accessToken');
   if (to.meta.requiresAuth && !isAuthenticated) return { name: 'Login' }
+
+  if (isAuthenticated && Object.keys(store.state.user).length == 0) {
+    store.dispatch('getUserData');
+  }
+
+  if (to.meta.requiredAdmin && !store.state.user.is_admin) {
+    return { name: 'MainView' }
+  }
+  
 })
 
 export default router
