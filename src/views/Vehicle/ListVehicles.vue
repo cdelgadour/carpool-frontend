@@ -1,7 +1,7 @@
 <template>
   <div class="card shadow-sm p-4" v-if="!selectedVehicle">
     <h3 class="text-center mb-4">Mis Vehículos</h3>
-    <button @click="register" type="submit" class="btn btn-primary">Registrar Vehiculo</button>
+    <button @click="register" type="submit" class="btn btn-success">Registrar Vehiculo</button>
     <div class="container-fluid">
       <div class="row" v-for="vehicle in vehicles" :key="vehicle.plate">
         <div class="col-md-6 text-start align-items-center">
@@ -18,7 +18,7 @@
             <button class="btn btn-outline-dark btn-sm" @click="showDetails(vehicle)">
               <fa :icon="['fas', 'eye']" />
             </button>
-            <button class="btn btn-outline-primary btn-sm" @click="edit(vehicle.plate)">
+            <button class="btn btn-outline-success btn-sm" @click="edit(vehicle.plate)">
               <fa :icon="['fas', 'pencil']" />
             </button>
             <button class="btn btn-outline-danger btn-sm" @click="showDetailsDelete(vehicle)">

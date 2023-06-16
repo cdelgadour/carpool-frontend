@@ -1,8 +1,19 @@
 <template>
     <div>
-        <h2>Reseñas</h2>
+        <h3 class="text-center mb-4">Reseñas</h3>
+        <div class="card shadow-sm mb-2 p-3" id="filters">
+            Filtrar por Estrellas
+            <select class="form-select" v-model="selectedStarFilter">
+                <option value="">Todas</option>
+                <option v-for="star in stars" :value="star" :key="star">{{ star }} Estrella(s)</option>
+            </select>
+        </div>
+        <div class="text-center mt-5" v-if="driverRates.length === 0">
+            <h4 class="text-danger mb-4">No ha recibido ninguna reseña.</h4>
+            <img style="height: 12rem;" src="~@/assets/404.jpg" />
+        </div>
         <div v-if="!selectedRate">
-            <div class="card shadow-sm mb-2" v-for="rate in driverRates" :key="rate.id">
+            <div class="card shadow-sm mb-2" v-for="rate in filteredDriverRates" :key="rate.id">
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-md-6 text-start align-items-center">
@@ -33,7 +44,7 @@
                             <div class="m-1">
                                 <h3>{{ formatDate(selectedRate.date) }}</h3>
                                 <i>"{{ selectedRate.comment }}"</i>
-                                <br/>
+                                <br />
                                 <span v-for="r in selectedRate.rate">&#11088;</span>
                                 <hr />
                                 <p>Detalles del Viaje</p>
@@ -66,7 +77,9 @@ import { CommonUtils } from '@/utils/CommonUtils';
 export default defineComponent({
     data() {
         return {
-            selectedRate: null as Rate | null
+            selectedRate: null as Rate | null,
+            selectedStarFilter: '',
+            stars: [5, 4, 3, 2, 1] 
         };
     },
     methods: {
@@ -84,6 +97,14 @@ export default defineComponent({
         ...mapGetters({
             driverRates: 'getDriverRates'
         }),
+        filteredDriverRates() {
+            if (!this.selectedStarFilter) {
+                return this.driverRates;
+            } else {
+                const selectedRating = parseInt(this.selectedStarFilter);
+                return this.driverRates.filter((rate: { rate: string; }) => parseInt(rate.rate) === selectedRating);
+            }
+        }
     },
     mounted() {
         this.$store.dispatch('getDriverRates');

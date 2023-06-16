@@ -1,19 +1,26 @@
 <template>
-    <div class="">
+    <div>
     <h3 class="text-center mb-4">Solicitudes</h3>
+    <div class="card shadow-sm mb-3 p-3" id="filters">
+      Filtrar por Estatus
+      <select class="form-select" v-model="selectedStatusFilter">
+        <option value="">Todos</option>
+        <option v-for="statuss in requestStatus" :value="statuss" :key="statuss">{{ statuss }}</option>
+      </select>
+    </div>
     <div class="container-fluid">
-      <div class="row card shadow-sm p-4 mb-4" v-for="request in driverRequests" :key="request.id">
+      <div class="row card shadow-sm p-3 mb-2" v-for="request in filteredDriverRequest" :key="request.id">
         <div class="col-md-6 text-start align-items-center">
           <div class="my-1">
-            <p class="mb-0"><strong>Solicitud #{{ request.id }}</strong></p>
-            <p class="mb-0"><strong>Conductor {{ request.user.name }}</strong></p>
-            <p class="mb-0"><strong>Estado: {{ selectedDecisionChoice(request.decision) }}</strong></p>
-            <p>Fecha: {{ formattedDate(request.created_at) }}</p>
+            <p class="mb-0"><strong><fa color="green" :icon="['fa', 'pen']" /> | Solicitud #{{ request.id }}</strong></p>
+            <p class="mb-0"><strong><fa color="green" :icon="['fa', 'user']" /> | Conductor {{ request.user.name }}</strong></p>
+            <p class="mb-0"><strong><fa color="green" :icon="['fa', 'circle-question']" /> | Estado: {{ selectedDecisionChoice(request.decision) }}</strong></p>
+            <p><fa color="green" :icon="['fa', 'calendar-days']" /> | Fecha: {{ formattedDate(request.created_at) }}</p>
           </div>
         </div>
         <div class="col-md-6">
           <div class="m-1 text-end">
-            <button class="btn btn-outline-dark btn-sm" @click="showDetails(request.id)">Ver Detalles</button>
+            <button class="btn btn-outline-success btn-sm" @click="showDetails(request.id)">Ver Detalles</button>
           </div>
         </div>
       </div>
@@ -33,7 +40,9 @@ export default defineComponent({
     },
     data() {
         return {
-            disableSendButton: false
+            disableSendButton: false,
+            selectedStatusFilter: '',
+            requestStatus: ['Aprobado', 'Rechazado']
         }
     },
     computed: {
@@ -43,7 +52,15 @@ export default defineComponent({
         }),
         ...mapState({
           interruptLoad: 'interruptGet'
-        })
+        }),
+        filteredDriverRequest() {
+            if (!this.selectedStatusFilter) {
+                return this.driverRequests;
+            } else {
+                const selectedStatus = this.requestDecisionChoices.find((r: NamedChoices) => r.name == this.selectedStatusFilter).id;
+                return this.driverRequests.filter((request: { decision: number; }) => request.decision === parseInt(selectedStatus));
+            }
+        }
     },
     methods: {
         selectedDecisionChoice(id: string) {
