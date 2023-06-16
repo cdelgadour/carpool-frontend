@@ -15,6 +15,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import ProfileView from '@/views/ProfileView.vue'
 import DriverRequestList from '@/views/Drivers/admin/DriverRequestList.vue'
 import DriverRequestDetail from '@/views/Drivers/admin/DriverRequestDetail.vue'
+import DriverCreateRoute from '@/views/DriverCreateRoute.vue'
 import store from '@/store'
 
 const router = createRouter({
@@ -98,6 +99,22 @@ const router = createRouter({
         requiresAuth: true
       },
       component: UserRates
+    },
+    {
+      path: '/driver/create',
+      name: 'DriverCreateRoute',
+      meta: {
+        requiresAuth: true
+      },
+      component: DriverCreateRoute
+    },
+    {
+      path: '/passenger/search',
+      name: 'PassengerSeachRoute',
+      meta: {
+        requiresAuth: true
+      },
+      component: DriverCreateRoute
     },
     {
       path: '/:catchAll(.*)',

@@ -1,6 +1,6 @@
 <template>
   <app-header></app-header>
-  <div class="container mt-4 px-4">
+  <div class="container mt-2 px-4">
     <RouterView />
   </div>
 </template>
@@ -18,3 +18,7 @@ export default defineComponent({
   }
 })
 </script>
+
+<style>
+@import "vue-select/dist/vue-select.css";
+</style>

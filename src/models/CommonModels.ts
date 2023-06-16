@@ -81,3 +81,35 @@ export interface NamedChoices {
     id: string,
     name: string
 }
+
+export interface AddressSuggestionProperties {
+    address: string,
+    category: string,
+    foursquare: string,
+    landmark: boolean
+}
+
+export interface AddressSuggestion {
+    center: number[],
+    place_name: string;
+    id: string,
+    text: string,
+    properties: AddressSuggestionProperties
+}
+
+export interface SelectedPoint {
+    type: string,
+    geometry: {
+        coordinates: number[],
+        type: string
+    },
+    properties: {
+        id: string
+    }
+}
+
+export interface Route {
+    distance: number,
+    duration: number,
+    geometry: string
+}

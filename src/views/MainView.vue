@@ -1,18 +1,20 @@
 <template>
-    <h3>Main View</h3>
-    <p>En construcción</p>
-    <div v-if="isDriver">
-        <div class="container-fluid">
-            <div class="row card shadow-sm p-3 mb-2 text-center">
-                <div class="btn">
-                    <fa class="mb-2" color="red" :icon="['fas', 'location-dot']" size="2xl" beat-fade/>
-                    <br/><b>Viajes agendados</b>
+    <div>
+        <h2>Bienvenido</h2>
+        <p>¿Qué deseas hacer?</p>
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center mb-4">
+                    <button class="create-bttn p-4" @click="goTo('DriverCreateRoute')">
+                        <fa :icon="['fas', 'car']" style="color: #fff" size="2xl"/><br>
+                        <p class="mb-0 mt-2">Programar un viaje</p>
+                    </button>
                 </div>
-            </div>
-            <div class="row card shadow-sm p-3 mb-2 text-center">
-                <div class="btn">
-                    <fa class="mb-2" color="green" :icon="['fas', 'map-location-dot']" size="2xl" beat-fade/>
-                    <br/><b>Crear viaje</b>
+                <div class="col-12 text-center">
+                    <button class="search-bttn p-4" @click="goTo('DriverCreateRoute')">
+                        <fa class="create-icon" :icon="['fas', 'search']" style="color: #fff" size="2xl"/><br>
+                        <p class="mb-0 mt-2">Buscar un carpool</p>
+                    </button>
                 </div>
             </div>
         </div>
@@ -21,17 +23,34 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { mapGetters } from 'vuex';
-export default defineComponent({
-    computed: {
-        ...mapGetters({
-            isDriver: 'getIsDriver'
-        }),
-    },
-    methods: {
 
+// #449441 Verde UNPHU
+// #0f385a Azul UNPHU
+
+export default defineComponent({
+    methods: {
+        goTo(routeName: string) {
+            this.$router.push({ name: routeName})
+        }
     }
 })
 </script>
 
-<style></style>
+
+
+<style scoped>
+.create-bttn {
+    background-color: #449441;
+}
+.search-bttn {
+    background-color: #0f385a;
+}
+
+button {
+    max-width: 275px;
+    color: white;
+    border: 0;
+    box-shadow: 1px 1px 8px 1px #00000061;
+    border-radius: 5px
+}
+</style>
