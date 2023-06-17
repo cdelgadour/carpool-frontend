@@ -1,5 +1,5 @@
 import { createStore, type ActionContext } from 'vuex'
-import type { Brand, LoggedInUser, Model, VehicleWrite, VehicleRead, Rate, Payments, DriverRequests, NamedChoices } from './models/CommonModels';
+import type { Brand, LoggedInUser, Model, VehicleWrite, VehicleRead, Rate, Payments, DriverRequests, NamedChoices, Trip } from './models/CommonModels';
 import APIService from './service';
 import DriverService from './services/vehicle.service';
 
@@ -24,7 +24,8 @@ interface AppState {
     driverPayments: Payments[],
     driverRequests: DriverRequests[],
     driverDecisionChoices: NamedChoices[]
-    interruptGet: boolean
+    interruptGet: boolean,
+    trips: Trip[]
 }
 
 const initialState = {
@@ -37,7 +38,8 @@ const initialState = {
     driverPayments: [],
     driverRequests: [],
     driverDecisionChoices: requestDecisions,
-    interruptGet: false
+    interruptGet: false,
+    trips: []
 } as AppState
 
 const apiService = new APIService();
@@ -72,6 +74,9 @@ export default createStore({
         getDriverDecisionChoices(state) : NamedChoices[] {
             return state.driverDecisionChoices
         },
+        getDriverTrips(state) : Trip[] {
+            return state.trips
+        },
         getIsDriver(state) : boolean {
             return state.user.driver != "" 
         },
@@ -91,6 +96,15 @@ export default createStore({
         },
         ADD_NEW_VEHICLE(state: AppState, data: VehicleWrite) {
             state.vehiclesWrite.push(data)
+        },
+        SET_TRIPS(state: AppState, data: Trip[]) {
+            state.trips = data
+        },
+        ADD_NEW_TRIP(state: AppState, data: Trip) {
+            state.trips.push(data)
+        },
+        DELETE_TRIP(state: AppState, id: number) {
+            state.trips = state.trips.filter((x) => x.id != id)
         },
         UPDATE_VEHICLE(state: AppState, data: VehicleWrite) {
             state.vehiclesWrite.push(data)
@@ -157,6 +171,16 @@ export default createStore({
                 console.log(error)
             }            
         },
+        async createTrip(context: ActionContext<AppState, AppState>, data: Trip) {
+            try {
+                let response = await apiService.post('api/trips/', data)
+                context.commit('ADD_NEW_TRIP', response.data)
+                return true
+            } catch (error) {
+                console.log(error)
+                return false
+            }            
+        },
         async updateVehicle(context: ActionContext<AppState, AppState>, data: VehicleWrite) {
             try {
                 let response = await apiService.patch('api/vehicles/', data, data.id)
@@ -199,6 +223,16 @@ export default createStore({
             try {
                 let response = await apiService.get(`api/driver/${driverId}/payments/`)
                 context.commit('GET_DRIVER_PAYMENTS', response.data)
+            } catch (error) {
+                console.log(error)
+            }            
+        },
+        async getDriverTrips(context: ActionContext<AppState, AppState>) {
+            const driverId = context.state.user.driver;
+            
+            try {
+                let response = await apiService.get(`api/trips/`)
+                context.commit('SET_TRIPS', response.data)
             } catch (error) {
                 console.log(error)
             }            

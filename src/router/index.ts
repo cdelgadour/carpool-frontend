@@ -16,6 +16,8 @@ import ProfileView from '@/views/ProfileView.vue'
 import DriverRequestList from '@/views/Drivers/admin/DriverRequestList.vue'
 import DriverRequestDetail from '@/views/Drivers/admin/DriverRequestDetail.vue'
 import DriverCreateRoute from '@/views/DriverCreateRoute.vue'
+import DriverDetailRoute from '@/views/DriverDetailRoute.vue'
+import DriverRouteList from '@/views/DriverRouteList.vue'
 import store from '@/store'
 
 const router = createRouter({
@@ -107,6 +109,22 @@ const router = createRouter({
         requiresAuth: true
       },
       component: DriverCreateRoute
+    },
+    {
+      path: '/driver/routes/:id',
+      name: 'DriverDetailRoute',
+      meta: {
+        requiresAuth: true
+      },
+      component: DriverDetailRoute
+    },
+    {
+      path: '/driver/routes',
+      name: 'DriverRouteList',
+      meta: {
+        requiresAuth: true
+      },
+      component: DriverRouteList
     },
     {
       path: '/passenger/search',

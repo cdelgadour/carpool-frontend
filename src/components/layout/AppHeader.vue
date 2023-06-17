@@ -19,6 +19,9 @@
             <li class="nav-item" v-if="isDriver" data-bs-toggle="collapse" data-bs-target=".navbar-collapse.show">
             <a class="nav-link active" @click="goToRoute('Vehicles')" aria-current="page" href="#">Mis vehículos</a>
             </li>
+            <li class="nav-item" v-if="isDriver" data-bs-toggle="collapse" data-bs-target=".navbar-collapse.show">
+            <a class="nav-link active" @click="goToRoute('DriverRouteList')" aria-current="page" href="#">Mis viajes</a>
+            </li>
             <li class="nav-item" v-if="isDriver || showAdminRoutes" data-bs-toggle="collapse" data-bs-target=".navbar-collapse.show">
             <a class="nav-link active" @click="goToRoute('DriverPayments')" aria-current="page" href="#">Pagos</a>
             </li>

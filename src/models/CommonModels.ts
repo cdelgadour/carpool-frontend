@@ -59,7 +59,8 @@ export interface Trip {
     status: number,
     trip_type: number,
     updated_at: string,
-    updated_by: number
+    updated_by: number,
+    scheduled_date: Date
 }
 
 export interface Rate {

@@ -5,9 +5,15 @@
         <div class="container">
             <div class="row">
                 <div class="col-12 text-center mb-4">
-                    <button class="create-bttn p-4" @click="goTo('DriverCreateRoute')">
+                    <button class="search-bttn p-4" @click="goTo('DriverCreateRoute')">
                         <fa :icon="['fas', 'car']" style="color: #fff" size="2xl"/><br>
                         <p class="mb-0 mt-2">Programar un viaje</p>
+                    </button>
+                </div>
+                <div class="col-12 text-center mb-4">
+                    <button class="create-bttn p-4" @click="goTo('DriverRouteList')">
+                        <fa :icon="['fas', 'map']" style="color: #fff" size="2xl"/><br>
+                        <p class="mb-0 mt-2">Ver viajes agendados</p>
                     </button>
                 </div>
                 <div class="col-12 text-center">
@@ -47,7 +53,7 @@ export default defineComponent({
 }
 
 button {
-    max-width: 275px;
+    width: 300px;
     color: white;
     border: 0;
     box-shadow: 1px 1px 8px 1px #00000061;
