@@ -60,17 +60,16 @@ export default defineComponent({
     data() {
         return {
             chosenDate: null,
-            userSelectedPoint: {} as SelectedPoint,
+            userSelectedPoint: {} as mapboxgl.Marker,
             constructedRoute: {} as Route,
             map: {} as mapboxgl.Map,
             originPointText: '',
             sessionToken: '5a057974-f75c-47e1-912e-75f5d0832626',
             accessToken: 'pk.eyJ1IjoiY2RlbGdhZG91bnBodSIsImEiOiJjbGVhcmV1eDgwOXU0M3BvZDB6b3UwaW5kIn0.9AuJG-JNVlHwoSH9C8Pr2A',
-            UNPHU: {"id":"poi.498216230466","type":"Feature","place_type":["poi"],"relevance":0.8,"properties":{"foursquare":"4bec1ab861aca59364cb8500","landmark":true,"address":"Av.john f.kennedy KM 6 1/2","category":"college, university","maki":"college"},"text":"Universidad Nacional Pedro Henríquez Ureña (UNPHU)","place_name":"Universidad Nacional Pedro Henríquez Ureña (UNPHU), Av.john f.kennedy KM 6 1/2, Santo Domingo de Guzmán, Distrito Nacional, Dominican Republic","center":[-69.948492,18.484636],"geometry":{"coordinates":[-69.948492,18.484636],"type":"Point"},"context":[{"id":"locality.12413503","mapbox_id":"dXJuOm1ieHBsYzp2V28v","text":"Los Jardines"},{"id":"place.1116223","wikidata":"Q34820","mapbox_id":"dXJuOm1ieHBsYzpFUWcv","text":"Santo Domingo de Guzmán"},{"id":"region.197695","short_code":"DO-01","wikidata":"Q2499228","mapbox_id":"dXJuOm1ieHBsYzpBd1Ev","text":"Distrito Nacional"},{"id":"country.8767","short_code":"do","wikidata":"Q786","mapbox_id":"dXJuOm1ieHBsYzpJajg","text":"Dominican Republic"}]} as AddressSuggestion,
             direction: {},
             modalInstance: null as Modal | null,
             routeConfirmModalMsg: '¿Deseas confirmar la ruta?',
-            routeCreationError: false
+            routeCreationError: false,
         }
     },
     computed: {
@@ -185,9 +184,13 @@ export default defineComponent({
                 this.addLayer()
                 this.getOriginDestinationPoints()
             })
-        },
-        setUserSelectedPoint(data: { feature: SelectedPoint }) {
-            this.userSelectedPoint = data.feature;
+
+            this.map.on('click', (e) => {
+                if (Object.keys(this.userSelectedPoint).length) this.userSelectedPoint.remove();
+                this.userSelectedPoint = new mapboxgl.Marker()
+                                            .setLngLat([e.lngLat.lng, e.lngLat.lat])
+                                            .addTo(this.map);
+            })
         },
         updateRoute(routes: { route: Route }) {
             this.constructedRoute = routes.route
