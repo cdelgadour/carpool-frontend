@@ -60,6 +60,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import { mapState } from 'vuex';
 import mapboxgl from 'mapbox-gl'
 import { mapGetters } from 'vuex';
 import { Modal } from 'bootstrap';
@@ -86,6 +87,10 @@ export default defineComponent({
         ...mapGetters({
             user: 'getUserData'
         }),
+        ...mapState({
+            loadedMap: 'loadedCreateRouteMap'
+        }),
+        
         todayDate() {
             return new Date();
         },
@@ -112,10 +117,13 @@ export default defineComponent({
                 center: [-69.95, 18.47],
                 zoom: 12
             });
-
+            this.map.on('load', this.loadDirections);
+        },
+        loadDirections() {
             this.direction = new MapboxDirections({ 
                 accessToken: mapboxgl.accessToken,
                 profile: 'mapbox/driving',
+                placeholderOrigin: 'Elige punto de partida',
                 controls: {
                     instructions: false,
                     profileSwitcher: false
@@ -123,17 +131,20 @@ export default defineComponent({
             });
 
             this.map.addControl(<any>(this.direction), 'top-left' );
-            this.direction.on('destination', this.testCalled);
-            this.direction.on('origin', this.setUserSelectedPoint);
-            this.direction.on('route', this.updateRoute);
-            this.direction.setDestination('Universidad Nacional Pedro Henriquez Urena');
-            // this.direction.setOrigin([-69.952775,18.450854])
+            if (!this.loadedMap) {
+                this.direction.on('origin', this.setUserSelectedPoint);
+                this.direction.on('destination', this.testCalled);
+                this.direction.on('route', this.updateRoute);
+            }
+            
+            setTimeout(() => this.direction.setDestination('Universidad Nacional Pedro Henriquez Urena'), 500)
+            this.$store.commit('SET_LOADED_CREATE_ROUTE_MAP');
         },
-        testCalled({ feature }) {
+        testCalled(feature: any) {
             if (feature && feature.geometry) {
                 if (feature.geometry.coordinates[0] != this.UNPHU.center[0] || feature.geometry.coordinates[0] != this.UNPHU.center[0]) {
-                    this.direction.setDestination('Universidad Nacional Pedro Henriquez Urena');
-                    // this.direction.setDestination([this.UNPHU.center[0],this.UNPHU.center[1]]);
+                    // this.direction.setDestination('Universidad Nacional Pedro Henriquez Urena');
+                    this.direction.setDestination([this.UNPHU.center[0],this.UNPHU.center[1]]);
                 }
             }
         },
@@ -191,6 +202,7 @@ export default defineComponent({
         }
     },
     mounted() {
+        // this.direction.off('destination', this.testCalled);
         const modalElement = document.getElementById('confirmModal');
         if (modalElement && modalElement instanceof Element) {
             this.modalInstance = new Modal(modalElement)

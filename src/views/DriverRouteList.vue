@@ -6,20 +6,22 @@
                 <p>Viaje #{{ trip.id }}</p>
                 <p>Tipo de Viaje: {{ trip.trip_type == 1 ? 'Hacia UNPHU' : 'Desde UNPHU'}}</p>
                 <p>Fecha pautada: {{ trip.scheduled_date }}</p>
-                <p>Estatus: <strong>Pendiente</strong></p>
+                <p>Estatus: <strong>{{ selectedDecisionChoice(trip.status) }}</strong></p>
             </div>
         </div>
     </div>
 </template>
 
 <script lang="ts">
+import type { NamedChoices } from '@/models/CommonModels';
 import { defineComponent } from 'vue';
 import { mapGetters } from 'vuex';
 
 export default defineComponent({
     computed: {
         ...mapGetters({
-            trips: 'getDriverTrips'
+            trips: 'getDriverTrips',
+            tripStatusList: 'getTripStatus'
         })
     },
     mounted() {
@@ -28,6 +30,12 @@ export default defineComponent({
     methods: {
         goToDetail(id: string) {
             this.$router.push({ name: 'DriverDetailRoute', params: { id: id }})
+        },
+        selectedDecisionChoice(id: string) {
+            if (this.tripStatusList) {
+                return this.tripStatusList.find((tripStatus: NamedChoices) => tripStatus.id == id).name;
+            }
+            return ''
         }
     }
 })

@@ -8,6 +8,7 @@
                         <div class="container">
                             <div class="row px-0">
                                 <p class="p-0 m-0 mb-2"><strong>Fecha y hora: </strong>{{ offsetDateTime }}</p>
+                                <p class="p-0 m-0 mb-2"><strong>Estado: </strong>{{ selectedDecisionChoice }}</p>
                             </div>
                         </div>
                     </div>
@@ -52,7 +53,8 @@ import { defineComponent } from 'vue';
 import mapboxgl from 'mapbox-gl'
 import { mapGetters } from 'vuex';
 import { Modal } from 'bootstrap';
-import type { AddressSuggestion, SelectedPoint, Route, Trip } from '@/models/CommonModels';
+import polyline from '@mapbox/polyline';
+import type { AddressSuggestion, SelectedPoint, Route, Trip, NamedChoices } from '@/models/CommonModels';
 
 export default defineComponent({
     data() {
@@ -74,8 +76,13 @@ export default defineComponent({
     computed: {
         ...mapGetters({
             user: 'getUserData',
-            trips: 'getDriverTrips'
+            trips: 'getDriverTrips',
+            tripStatusList: 'getTripStatus'
         }),
+        selectedDecisionChoice() {
+          if (this.selectedTrip) return this.tripStatusList.find((r: NamedChoices) => r.id == this.selectedTrip.status).name;
+          return 'Pendiente'
+        },
         selectedTrip() {
             const selectedId = this.$route.params.id;
             if (this.trips) return this.trips.find((trip: Trip) => trip.id.toString() == selectedId)
@@ -116,15 +123,50 @@ export default defineComponent({
             console.log(value);
         },  
         trips(value: Trip[]) {
-            console.log("Hello there");
             if (value.length) {
-                console.log("Hello there");
                 const selectedId = this.$route.params.id;
                 this.selectedTrip = this.trips.filter((t: Trip) => t.id.toString() == selectedId)[0]
             }
         }
     },
     methods:{
+        getOriginDestinationPoints() {
+            if (this.selectedTrip && Object.keys(this.map).length) {
+                const steps = this.selectedTrip.route[0].legs[0].steps;
+                const origin = steps[0];
+                const destination = steps[steps.length - 1];
+                const data = {
+                    origin: origin.intersections[0].location,
+                    destination: destination.intersections[0].location
+                }
+                this.loadMarkers(data);
+                return data
+            }
+            return null
+        },
+        loadMarkers(data: any) {
+            new mapboxgl.Marker()
+                .setLngLat([data.origin[0], data.origin[1]])
+                .addTo(this.map);
+
+            new mapboxgl.Marker()
+                .setLngLat([data.destination[0], data.destination[1]])
+                .addTo(this.map);
+        },
+        addLayer() {
+            this.map.addLayer({
+                id: 'route',
+                type: 'line',
+                source: {
+                    type: 'geojson',
+                    data: polyline.toGeoJSON(this.selectedTrip.route[0].geometry)
+                },
+                paint: {
+                    "line-width": 3,
+                    "line-color": "#449441"
+                }
+            })
+        },
         initialState() {
             this.routeConfirmModalMsg = '¿Deseas confirmar la ruta?';
             this.routeCreationError = false;
@@ -139,29 +181,10 @@ export default defineComponent({
                 zoom: 12
             });
 
-            this.direction = new MapboxDirections({ 
-                accessToken: mapboxgl.accessToken,
-                profile: 'mapbox/driving',
-                controls: {
-                    instructions: false,
-                    profileSwitcher: false
-                }
-            });
-
-            this.map.addControl(<any>(this.direction), 'top-left' );
-            this.direction.on('destination', this.testCalled);
-            this.direction.on('origin', this.setUserSelectedPoint);
-            this.direction.on('route', this.updateRoute);
-            this.direction.setDestination('Universidad Nacional Pedro Henriquez Urena');
-            // this.direction.setOrigin([-69.952775,18.450854])
-        },
-        testCalled({ feature }) {
-            if (feature && feature.geometry) {
-                if (feature.geometry.coordinates[0] != this.UNPHU.center[0] || feature.geometry.coordinates[0] != this.UNPHU.center[0]) {
-                    this.direction.setDestination('Universidad Nacional Pedro Henriquez Urena');
-                    // this.direction.setDestination([this.UNPHU.center[0],this.UNPHU.center[1]]);
-                }
-            }
+            this.map.on('load', () => {
+                this.addLayer()
+                this.getOriginDestinationPoints()
+            })
         },
         setUserSelectedPoint(data: { feature: SelectedPoint }) {
             this.userSelectedPoint = data.feature;

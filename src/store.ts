@@ -14,6 +14,25 @@ const requestDecisions: NamedChoices[] = [
     },
 ]
 
+const TripStatus: NamedChoices[] = [
+    {
+        id: '1',
+        name: 'Pendiente'
+    },
+    {
+        id: '2',
+        name: 'En curso'
+    },
+    {
+        id: '3',
+        name: 'Finalizado'
+    },
+    {
+        id: '5',
+        name: 'Cancelado'
+    },
+]
+
 interface AppState {
     brands: Brand[],
     models: Model[],
@@ -25,7 +44,8 @@ interface AppState {
     driverRequests: DriverRequests[],
     driverDecisionChoices: NamedChoices[]
     interruptGet: boolean,
-    trips: Trip[]
+    trips: Trip[],
+    loadedCreateRouteMap: boolean
 }
 
 const initialState = {
@@ -39,7 +59,8 @@ const initialState = {
     driverRequests: [],
     driverDecisionChoices: requestDecisions,
     interruptGet: false,
-    trips: []
+    trips: [],
+    loadedCreateRouteMap: false
 } as AppState
 
 const apiService = new APIService();
@@ -77,6 +98,9 @@ export default createStore({
         getDriverTrips(state) : Trip[] {
             return state.trips
         },
+        getTripStatus() : NamedChoices[] {
+            return TripStatus
+        },
         getIsDriver(state) : boolean {
             return state.user.driver != "" 
         },
@@ -90,6 +114,9 @@ export default createStore({
         },
         SET_VEHICLE_MODELS(state: AppState, data: Model[]) {
             state.models = data
+        },
+        SET_LOADED_CREATE_ROUTE_MAP(state: AppState) {
+            state.loadedCreateRouteMap = true;
         },
         GET_USER_VEHICLES(state: AppState, data: VehicleRead[]) {
             state.vehiclesRead = data
@@ -254,6 +281,6 @@ export default createStore({
             } catch (error) {
                 console.log(error)
             }            
-        },
+        }
     }
 })
