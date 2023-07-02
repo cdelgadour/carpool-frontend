@@ -59,7 +59,9 @@ export default defineComponent({
     },
     methods: {
         goToRoute(route: string) {
-            this.$router.push({'name': route});
+            if (this && this.$router) {
+                this.$router.push({'name': route});
+            }
         },
         logout() {
             localStorage.removeItem('accessToken');

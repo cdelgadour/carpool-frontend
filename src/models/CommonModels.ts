@@ -63,6 +63,19 @@ export interface Trip {
     scheduled_date: Date
 }
 
+export interface TripDetail {
+    trip: string,
+    pickup_place: any,
+    destination: string
+    preferences: string,
+    code: string,
+    input_code: Boolean,
+    user: string
+    amount_payed: Number,
+    payment_date: Date,
+    payment_status: Number
+}
+
 export interface Rate {
     trip: Trip,
     rate: string,

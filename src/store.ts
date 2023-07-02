@@ -1,5 +1,5 @@
 import { createStore, type ActionContext } from 'vuex'
-import type { Brand, LoggedInUser, Model, VehicleWrite, VehicleRead, Rate, Payments, DriverRequests, NamedChoices, Trip } from './models/CommonModels';
+import type { Brand, LoggedInUser, Model, VehicleWrite, VehicleRead, Rate, Payments, DriverRequests, NamedChoices, Trip, TripDetail } from './models/CommonModels';
 import APIService from './service';
 import DriverService from './services/vehicle.service';
 
@@ -45,7 +45,8 @@ interface AppState {
     driverDecisionChoices: NamedChoices[]
     interruptGet: boolean,
     trips: Trip[],
-    loadedCreateRouteMap: boolean
+    loadedCreateRouteMap: boolean,
+    tripDetail: TripDetail[]
 }
 
 const initialState = {
@@ -60,7 +61,8 @@ const initialState = {
     driverDecisionChoices: requestDecisions,
     interruptGet: false,
     trips: [],
-    loadedCreateRouteMap: false
+    loadedCreateRouteMap: false,
+    tripDetail: []
 } as AppState
 
 const apiService = new APIService();
@@ -129,6 +131,12 @@ export default createStore({
         },
         ADD_NEW_TRIP(state: AppState, data: Trip) {
             state.trips.push(data)
+        },
+        SET_TRIP_DETAIL(state: AppState, data: TripDetail[]) {
+            state.tripDetail = data
+        },
+        ADD_NEW_TRIP_DETAIL(state: AppState, data: TripDetail) {
+            state.tripDetail.push(data)
         },
         DELETE_TRIP(state: AppState, id: number) {
             state.trips = state.trips.filter((x) => x.id != id)
@@ -202,6 +210,16 @@ export default createStore({
             try {
                 let response = await apiService.post('api/trips/', data)
                 context.commit('ADD_NEW_TRIP', response.data)
+                return true
+            } catch (error) {
+                console.log(error)
+                return false
+            }            
+        },
+        async createTripDetail(context: ActionContext<AppState, AppState>, data: TripDetail) {
+            try {
+                let response = await apiService.post('api/trips-detail/', data)
+                context.commit('ADD_NEW_TRIP_DETAIL', response.data)
                 return true
             } catch (error) {
                 console.log(error)

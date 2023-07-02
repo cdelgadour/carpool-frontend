@@ -4,11 +4,12 @@
             <div class="col-md-12">
                 <div>
                     <div>
-                        <h3>Viaje: {{ selectedTrip.id }}</h3>
+                        <!-- <h3>Viaje: {{ selectedTrip.id }}</h3> -->
                         <div class="container">
                             <div class="row px-0">
                                 <p class="p-0 m-0 mb-2"><strong>Fecha y hora: </strong>{{ offsetDateTime }}</p>
                                 <p class="p-0 m-0 mb-2"><strong>Estado: </strong>{{ selectedDecisionChoice }}</p>
+                                <p class="p-0 m-0 mb-2 text-danger" v-if="showDistanceError">Punto de recogida está muy lejos de la ruta.</p>
                             </div>
                         </div>
                     </div>
@@ -51,16 +52,24 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import mapboxgl from 'mapbox-gl'
+import nearestPoint from '@turf/nearest-point';
+// import point from '@turf/helpers';
+import { feature, featureCollection, lineString, point, type Feature, type Units } from '@turf/helpers';
+import pointToLineDistance from '@turf/point-to-line-distance';
+import along from '@turf/along'
+import { getCoord } from '@turf/invariant'
 import { mapGetters } from 'vuex';
 import { Modal } from 'bootstrap';
 import polyline from '@mapbox/polyline';
 import type { AddressSuggestion, SelectedPoint, Route, Trip, NamedChoices } from '@/models/CommonModels';
+import type { Point } from '@turf/helpers'
 
 export default defineComponent({
     data() {
         return {
             chosenDate: null,
-            userSelectedPoint: {} as mapboxgl.Marker,
+            userSelectedMarker: {} as mapboxgl.Marker,
+            userSelectedPoint: {} as Feature,
             constructedRoute: {} as Route,
             map: {} as mapboxgl.Map,
             originPointText: '',
@@ -68,7 +77,7 @@ export default defineComponent({
             accessToken: 'pk.eyJ1IjoiY2RlbGdhZG91bnBodSIsImEiOiJjbGVhcmV1eDgwOXU0M3BvZDB6b3UwaW5kIn0.9AuJG-JNVlHwoSH9C8Pr2A',
             direction: {},
             modalInstance: null as Modal | null,
-            routeConfirmModalMsg: '¿Deseas confirmar la ruta?',
+            routeConfirmModalMsg: '¿Deseas confirmar tu punto de partida?',
             routeCreationError: false,
         }
     },
@@ -78,6 +87,13 @@ export default defineComponent({
             trips: 'getDriverTrips',
             tripStatusList: 'getTripStatus'
         }),
+        showDistanceError() {
+            if (this.userSelectedPoint && Object.keys(this.userSelectedPoint).length) {
+                let value = this.userSelectedPoint?.properties?.distanceToPoint.toFixed(2);
+                return value > 0.15;
+            }
+            return false
+        },
         selectedDecisionChoice() {
           if (this.selectedTrip) return this.tripStatusList.find((r: NamedChoices) => r.id == this.selectedTrip.status).name;
           return 'Pendiente'
@@ -94,12 +110,10 @@ export default defineComponent({
             return new Date(Date.now() + (7 * 24 * 60 * 60 * 1000))
         },
         isCompleted() {
-            return (Object.keys(this.constructedRoute).length != 0 && 
-                    Object.keys(this.userSelectedPoint).length != 0 && 
-                    this.chosenDate)
+            return Object.keys(this.userSelectedPoint).length > 0 && !this.showDistanceError;
         },
         offsetDateTime() {
-            if (Object.keys(this.selectedTrip).length) {
+            if (this.selectedTrip && Object.keys(this.selectedTrip).length) {
                 let date = new Date(this.selectedTrip.scheduled_date);
                 let dateFormatted = new Intl.DateTimeFormat('en-US', {
                 year: 'numeric',
@@ -118,14 +132,14 @@ export default defineComponent({
         }
     },
     watch: {
-        user: function(value) {
-            console.log(value);
-        },  
         trips(value: Trip[]) {
             if (value.length) {
                 const selectedId = this.$route.params.id;
                 this.selectedTrip = this.trips.filter((t: Trip) => t.id.toString() == selectedId)[0]
             }
+        },
+        userSelectedMarker(value) {
+            this.calculateMarkerToNearestPoint();
         }
     },
     methods:{
@@ -165,9 +179,20 @@ export default defineComponent({
                     "line-color": "#449441"
                 }
             })
+            const points = this.selectedTrip.route[0].legs[0].steps.map((step: any) => {
+                return step.maneuver.location
+            })
+            const el = document.createElement('div');
+            el.className = "black-dot";
+
+            for (let point of points) {
+                new mapboxgl.Marker({ element: el })
+                .setLngLat([point[0], point[1]])
+                .addTo(this.map);
+            }
         },
         initialState() {
-            this.routeConfirmModalMsg = '¿Deseas confirmar la ruta?';
+            this.routeConfirmModalMsg = '¿Deseas confirmar tu punto de partida?';
             this.routeCreationError = false;
             this.hideModal()
         },
@@ -186,11 +211,29 @@ export default defineComponent({
             })
 
             this.map.on('click', (e) => {
-                if (Object.keys(this.userSelectedPoint).length) this.userSelectedPoint.remove();
-                this.userSelectedPoint = new mapboxgl.Marker()
+                if (Object.keys(this.userSelectedMarker).length) this.userSelectedMarker.remove();
+                this.userSelectedMarker = new mapboxgl.Marker()
                                             .setLngLat([e.lngLat.lng, e.lngLat.lat])
                                             .addTo(this.map);
             })
+        },
+        calculateMarkerToNearestPoint() {
+            let pointCollection = this.selectedTrip.route[0].legs[0].steps.map((step: any) => {
+                return step.maneuver.location
+            })
+
+            const ls = lineString(pointCollection)
+            const distance = this.selectedTrip.route[0].distance
+            const options = { units: 'meters' as Units};
+            const points = []
+            for (let i = 50; i < distance; i = i + 50) {
+                points.push(point(along(ls, i, options).geometry.coordinates))
+            }
+            const pointCol = featureCollection<Point>(points)
+
+            let pointCoordinates = this.userSelectedMarker.getLngLat()
+            let markerPoint = point([pointCoordinates.lng, pointCoordinates.lat])
+            this.userSelectedPoint = nearestPoint(markerPoint, pointCol);
         },
         updateRoute(routes: { route: Route }) {
             this.constructedRoute = routes.route
@@ -217,16 +260,18 @@ export default defineComponent({
         },
         saveData() {
             const data = {
-                route: {...this.constructedRoute},
-                user_input_point: {...this.userSelectedPoint},
-                scheduled_data: this.chosenDate,
-                available_seats: 4,
-                status: 1,
-                trip_type: 1, // Hacer variable para manejar viaje de ida y de vuelta
-                driver: this.user.driver
+                trip: this.selectedTrip.id,
+                pickup_place: this.userSelectedPoint,
+                preferences: string,
+                code: string,
+                input_code: Boolean,
+                user: string,
+                amount_payed: Number,
+                payment_date: Date,
+                payment_status: Number
             }
 
-            this.$store.dispatch('createTrip', data)
+            this.$store.dispatch('createTripDetail', data)
                 .then(success => {
                     console.log(success);
                     if (success) {
@@ -285,4 +330,13 @@ input {
 select {
     min-width: 140px;
 }
+
+.black-dot {
+  height: 10px;
+  width: 10px;
+  border: 1px solid black;
+  background-color: white;
+  border-radius: 50%;
+}
+
 </style>
