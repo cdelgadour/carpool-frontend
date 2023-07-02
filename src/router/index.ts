@@ -2,6 +2,7 @@ import LoginViewVue from '@/views/LoginView.vue'
 import MainView from '@/views/MainView.vue'
 import NotFoundView from '@/views/404View.vue'
 
+import Trips from '@/views/Trips/Trips.vue'
 
 import DriverPayments from '@/views/Payments/DriverPayments.vue'
 
@@ -55,6 +56,14 @@ const router = createRouter({
         requiresAuth: true
       },
       component: ProfileView
+    },
+    {
+      path: '/trips',
+      name: 'Trips',
+      meta: {
+        requiresAuth: true
+      },
+      component: Trips
     },
     {
       path: '/payments',

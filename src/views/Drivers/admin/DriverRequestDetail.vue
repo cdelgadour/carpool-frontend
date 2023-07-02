@@ -1,7 +1,9 @@
 <template>
     <div class="row">
-        <button @click="goToDriverRequestList" class="btn btn-primary mb-3">Ir atrás</button>
-        <div class="card shadow-sm p-4" v-if="selectedRequest">
+        <button class="btn btn-sm text-start" @click="goToDriverRequestList" >
+            <fa class="btn btn-outline-success" :icon="['fas', 'arrow-left']" />
+        </button>
+        <div class="card shadow-sm p-3" v-if="selectedRequest">
             <div class="col-md-12">
                 <h2>Solicitud #{{ selectedRequest.id }}</h2>
                 <p class="mb-0">Nombre: {{ selectedRequest.user.name }}</p>
@@ -13,25 +15,27 @@
                     <button @click="showModal('R')" class="w-100 btn btn-danger">Rechazar</button>
                 </div>
                 <div class="col">
-                    <button @click="showModal('A')" class="w-100 btn btn-primary">Aceptar</button>
+                    <button @click="showModal('A')" class="w-100 btn btn-success">Aceptar</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+        aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLongTitle">Confirmar</h5>
-            </div>
-            <div class="modal-body">
-                {{ modalText }}
-            </div>
-            <div class="modal-footer">
-                <button type="button" @click="confirmAction('')" class="btn btn-danger" data-dismiss="modal">Cancelar</button>
-                <button type="button" @click="confirmAction('confirm')" class="btn btn-primary">Confirmar</button>
-            </div>
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Confirmar</h5>
+                </div>
+                <div class="modal-body">
+                    {{ modalText }}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" @click="confirmAction('')" class="btn btn-danger"
+                        data-dismiss="modal">Cancelar</button>
+                    <button type="button" @click="confirmAction('confirm')" class="btn btn-success">Confirmar</button>
+                </div>
             </div>
         </div>
     </div>
@@ -68,9 +72,9 @@ export default defineComponent({
     },
     mounted() {
         const modalElement = document.getElementById('confirmModal');
-            if (modalElement && modalElement instanceof Element) {
-                this.modalInstance = new Modal(modalElement)
-            }
+        if (modalElement && modalElement instanceof Element) {
+            this.modalInstance = new Modal(modalElement)
+        }
     },
     methods: {
         goToDriverRequestList() {
@@ -89,16 +93,16 @@ export default defineComponent({
             this.hideModal();
             this.modalText = '';
             if (action) {
-                const data = { id: this.selectedRequest.id, decision: this.decision == 'R' ? 1 : 2};
+                const data = { id: this.selectedRequest.id, decision: this.decision == 'R' ? 1 : 2 };
                 this.$store.commit('SET_INTERRUPT_LOAD');
                 this.$store.dispatch('decideOnRequest', data);
                 this.goToDriverRequestList();
             }
         },
-        registerDriver(){
+        registerDriver() {
             this.$store.dispatch('requestAsDriver').then(() => {
                 this.disableSendButton = true;
-            })  
+            })
         }
     }
 })

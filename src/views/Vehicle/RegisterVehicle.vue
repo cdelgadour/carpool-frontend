@@ -2,12 +2,12 @@
   <div class="card shadow-sm p-4">
     <div class="row mb-3">
       <div class="col-6">
-        <button class="btn btn-primary btn-sm" @click="goBack">
+        <button class="btn btn-outline-success btn-sm" @click="goBack">
           <fa :icon="['fas', 'arrow-left']" />
         </button>
       </div>
     </div>
-    <h3 class="text-center mb-4">Registro de Vehículo</h3>
+    <h3 class="text-center mb-4">{{ buttonMsg == 'Registrar' ? 'Registro de Vehículo' : 'Actualizar Vehículo'}}</h3>
     <form @submit.prevent="register">
       <div class="container-fluid">
         <div class="row">
@@ -76,7 +76,7 @@
 
           </div>
           <div class="d-flex flex-row-reverse mt-3">
-            <button type="submit" class="btn btn-primary">{{ buttonMsg }}</button>
+            <button type="submit" class="btn btn-success">{{ buttonMsg }}</button>
           </div>
         </div>
       </div>
