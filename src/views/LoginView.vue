@@ -17,7 +17,7 @@
         </div>
         <div class="mt-4 d-flex justify-content-between">
             <a class="btn btn-outline-secondary" href="#" @click="isLogin = !isLogin">{{ isLogin ? 'No tengo cuenta' : 'Ya tengo cuenta' }}</a>
-            <button type="submit" class="btn btn-success">{{ isLogin ? 'Ingresar' : 'Registrarte' }}</button>
+            <button type="submit" class="btn bttn-unphu-blue">{{ isLogin ? 'Ingresar' : 'Registrarte' }}</button>
         </div>
     </form>
 </template>

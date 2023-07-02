@@ -1,7 +1,13 @@
 <template>
   <app-header></app-header>
   <div class="container mt-2 px-4">
-    <RouterView />
+    <div class="row">
+      <div class="col-0 col-lg-2"></div>
+      <div class="col">
+        <RouterView />
+      </div>
+      <div class="col-0 col-lg-2"></div>
+    </div>
   </div>
 </template>
 

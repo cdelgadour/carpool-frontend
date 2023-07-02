@@ -1,12 +1,12 @@
 <template>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <nav class="navbar navbar-expand-lg navbar-light mb-3">
     <div class="container-fluid">
         <a class="navbar-brand" href="#">Carpool</a>
         <button class="navbar-toggler" type="button" v-if="!isLoggedIn" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0" v-if="!isLoggedIn">
             <li class="nav-item" data-bs-toggle="collapse" data-bs-target=".navbar-collapse.show">
             <a class="nav-link active" @click="goToRoute('MainView')" aria-current="page" href="#">Home</a>
             </li>
@@ -73,6 +73,11 @@ export default defineComponent({
 })
 </script>
 
-<style>
-
+<style scoped>
+nav {
+    background-color: var(--unphu-green);
+}
+nav >>> a {
+    color: white;
+}
 </style>

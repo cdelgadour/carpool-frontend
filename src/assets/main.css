@@ -1,0 +1,14 @@
+:root {
+    --unphu-green: #439441;
+    --unphu-blue: #10385a;
+}
+
+.bttn-unphu-blue {
+    background-color: var(--unphu-blue) !important;
+    color: white !important;
+  }
+  
+  .bttn-unphu-green {
+    background-color: var(--unphu-green) !important;
+    color: white !important;
+  }
