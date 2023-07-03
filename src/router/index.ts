@@ -18,6 +18,7 @@ import DriverRequestDetail from '@/views/Drivers/admin/DriverRequestDetail.vue'
 import DriverCreateRoute from '@/views/DriverCreateRoute.vue'
 import DriverDetailRoute from '@/views/DriverDetailRoute.vue'
 import DriverRouteList from '@/views/DriverRouteList.vue'
+import SearchRouteList from '@/views/SearchRouteList.vue'
 import store from '@/store'
 
 const router = createRouter({
@@ -125,6 +126,14 @@ const router = createRouter({
         requiresAuth: true
       },
       component: DriverRouteList
+    },
+    {
+      path: '/search/routes',
+      name: 'SearchRouteList',
+      meta: {
+        requiresAuth: true
+      },
+      component: SearchRouteList
     },
     {
       path: '/passenger/search',

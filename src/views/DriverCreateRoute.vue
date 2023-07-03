@@ -1,5 +1,25 @@
 <template>
     <div class="container">
+        <h3>Crear viaje</h3>
+        <div class="row">
+            <div class="col-md-12">
+                <p class="p-0 m-0 mb-2"><strong>Tipo de Viaje</strong></p>
+                <div class="col-md-12 w-100 mb-2">
+                    <button 
+                        :class="tripType == 0 ? 'btn-primary' : 'btn-light'" 
+                        class="btn w-50 to-trip-bttn"
+                        @click="selectTripType(0)">
+                        Hacia UNPHU
+                    </button>
+                    <button 
+                        :class="tripType == 1 ? 'btn-primary' : 'btn-light'" 
+                        class="btn w-50 from-trip-bttn"
+                        @click="selectTripType(1)">
+                        Desde la UNPHU
+                    </button>
+                </div>
+            </div>
+        </div>
         <div class="row">
             <div class="col-md-12">
                 <div>
@@ -80,7 +100,8 @@ export default defineComponent({
             direction: {},
             modalInstance: null as Modal | null,
             routeConfirmModalMsg: '¿Deseas confirmar el viaje?',
-            routeCreationError: false
+            routeCreationError: false,
+            tripType: null as null | number
         }
     },
     computed: {
@@ -104,6 +125,9 @@ export default defineComponent({
         }
     },
     methods:{
+        selectTripType(value: number) {
+            this.tripType = value;
+        },
         initialState() {
             this.routeConfirmModalMsg = '¿Deseas confirmar el viaje?';
             this.routeCreationError = false;
@@ -214,6 +238,14 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.to-trip-bttn {
+    border: 0.5px solid var(--unphu-blue);
+    border-radius: 5px 0px 0px 5px;
+}
+.from-trip-bttn {
+    border: 0.5px solid var(--unphu-blue);
+    border-radius: 0px 5px 5px 0px; 
+}
 input {
     border-radius: 5px;
 }

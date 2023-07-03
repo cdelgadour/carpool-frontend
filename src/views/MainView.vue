@@ -17,7 +17,7 @@
                     </button>
                 </div>
                 <div class="col-12 text-center mb-4">
-                    <button class="search-bttn p-4" @click="goTo('DriverCreateRoute')">
+                    <button class="search-bttn p-4" @click="goTo('SearchRouteList')">
                         <fa class="create-icon" :icon="['fas', 'search']" style="color: var(--unphu-blue)" size="2xl"/><br>
                         <p class="mb-0 mt-2">Buscar un carpool</p>
                     </button>
