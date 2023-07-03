@@ -19,6 +19,7 @@ import DriverCreateRoute from '@/views/DriverCreateRoute.vue'
 import DriverDetailRoute from '@/views/DriverDetailRoute.vue'
 import DriverRouteList from '@/views/DriverRouteList.vue'
 import SearchRouteList from '@/views/SearchRouteList.vue'
+import CreateReview from '@/views/CreateReview.vue'
 import store from '@/store'
 
 const router = createRouter({
@@ -102,6 +103,14 @@ const router = createRouter({
         requiresAuth: true
       },
       component: UserRates
+    },
+    {
+      path: '/create-rate',
+      name: 'CreateReview',
+      meta: {
+        requiresAuth: true
+      },
+      component: CreateReview
     },
     {
       path: '/driver/create',

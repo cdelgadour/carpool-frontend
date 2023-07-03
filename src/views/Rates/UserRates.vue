@@ -13,22 +13,27 @@
             <img style="height: 12rem;" src="~@/assets/404.jpg" />
         </div>
         <div v-if="!selectedRate">
-            <div class="card shadow-sm mb-2" v-for="rate in filteredDriverRates" :key="rate.id">
-                <div class="container-fluid">
-                    <div class="row">
-                        <div class="col-md-6 text-start align-items-center">
-                            <div class="m-1">
-                                <b>{{ formatDate(rate.date) }}</b>
-                                <br />
-                                <i>"{{ rate.comment }}"</i>
-                                <div class="text-start">
-                                    <span v-for="r in rate.rate">&#11088;</span>
+            <div class="row">
+                <div class="col-12">
+                    <div class="card p-2 shadow-sm mb-3" v-for="rate in filteredDriverRates" :key="rate.id">
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-md-6 text-start align-items-center">
+                                    <div class="m-1">
+                                        <p class="mb-0"><strong>Viaje #{{ rate.trip.id }}</strong></p>
+                                        <b>{{ formatDate(rate.date) }}</b>
+                                        <br />
+                                        <i>"{{ rate.comment }}"</i>
+                                        <div class="text-start">
+                                            <span v-for="r in rate.rate">&#11088;</span>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="m-1 text-end">
-                                <button class="btn btn-outline-dark btn-sm" @click="showDetails(rate)">Ver Detalles</button>
+                                <div class="col-md-6">
+                                    <div class="m-1 text-end">
+                                        <button class="btn btn-outline-dark btn-sm" @click="showDetails(rate)">Ver Detalles</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

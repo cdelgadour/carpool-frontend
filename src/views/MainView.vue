@@ -23,7 +23,7 @@
                     </button>
                 </div>
                 <div class="col-12 text-center mb-4">
-                    <button class="create-bttn p-4" @click="goTo('DriverRouteList')">
+                    <button class="create-bttn p-4" @click="goTo('DriverPayments')">
                         <fa :icon="['fas', 'money-bill']" style="color: var(--unphu-green)" size="2xl"/><br>
                         <p class="mb-0 mt-2">Ver pagos</p>
                     </button>
