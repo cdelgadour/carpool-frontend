@@ -1,5 +1,5 @@
 <template>
-    <form @submit.prevent="action">
+    <form v-if="!showTwoFactor"  @submit.prevent="action">
         <h3 class="text-center">{{ isLogin ? 'Ingresar' : 'Registrarte' }}</h3>
         <div class="text-center">
             <img style="height: 12rem;" src="~@/assets/taxi-login.jpg" alt="Animation" />
@@ -19,6 +19,29 @@
             <a class="btn btn-outline-secondary" href="#" @click="isLogin = !isLogin">{{ isLogin ? 'No tengo cuenta' : 'Ya tengo cuenta' }}</a>
             <button type="submit" class="btn bttn-unphu-blue">{{ isLogin ? 'Ingresar' : 'Registrarte' }}</button>
         </div>
+        <div class="mt-4 text-center">
+            <img class="w-100" style="max-width: 300px" src="https://scontent.fhex5-2.fna.fbcdn.net/v/t39.30808-6/302282929_494445592685222_6275639420636531197_n.png?_nc_cat=111&ccb=1-7&_nc_sid=e3f864&_nc_ohc=9NzxILMT5CoAX_s8EWB&_nc_ht=scontent.fhex5-2.fna&oh=00_AfA2BD3MMjVi29jNoOgfp5Hu58WHHdqxVmOtaMJsDUnXPA&oe=64AACABB" alt="">
+        </div>
+    </form>
+    <form @submit.prevent="action" v-else>
+        <h3 class="text-center">Confirma tu identidad</h3>
+        <div class="text-center">
+            <img style="height: 12rem;" src="~@/assets/taxi-login.jpg" alt="Animation" />
+        </div>
+        <p>Te enviamos un SMS al número que tienes registrado en la UNPHU.</p>
+        <p><strong>(***)-***-*353</strong></p>
+        <div class="mt-3">
+            <label class="form-label">Código:</label>
+            <input ref="usernameInput" class="form-control" style="background-color: mintcream;" v-model="twoFactorCode" type="text">
+            <p class="text-danger mb-0" v-if="errorMessage">{{ errorMessage }}</p>
+        </div>
+        <div class="mt-4 d-flex justify-content-between">
+            <a class="btn btn-outline-secondary" href="#" @click="send2FACode">Reenviar Código</a>
+            <button :disabled="twoFactorCode.length < 5" type="submit" class="btn bttn-unphu-blue">Confirmar</button>
+        </div>
+        <div class="mt-4 text-center">
+            <img class="w-100" style="max-width: 300px" src="https://scontent.fhex5-2.fna.fbcdn.net/v/t39.30808-6/302282929_494445592685222_6275639420636531197_n.png?_nc_cat=111&ccb=1-7&_nc_sid=e3f864&_nc_ohc=9NzxILMT5CoAX_s8EWB&_nc_ht=scontent.fhex5-2.fna&oh=00_AfA2BD3MMjVi29jNoOgfp5Hu58WHHdqxVmOtaMJsDUnXPA&oe=64AACABB" alt="">
+        </div>
     </form>
 </template>
 
@@ -34,11 +57,15 @@ export default defineComponent({
     },
     data() {
         return {
-            username: '',
-            password: '',
+            username: 'cd16-2204@unphu.edu.do',
+            password: 'admin123',
             isLogin: true,
             errorMessage: '',
-            signInErrorMessage: ''
+            signInErrorMessage: '',
+            showTwoFactor: false,
+            twoFactorCode: '',
+            generatedTwoFactorCode: '',
+            bypassTwoFactor: true
         }
     },
     validations() {
@@ -50,14 +77,45 @@ export default defineComponent({
     computed: {
         isCompleted() {
             return !this.v$.$invalid;
+        },
+        is2FACompleted() {
+            return this.twoFactorCode.length > 0
         }
     },
     mounted() {
     },
     methods: {
         action() {
-            if (this.isLogin) this.logIn();
+            if (this.isLogin) {
+                if (!this.showTwoFactor) {
+                    this.logIn();
+                    if (!this.bypassTwoFactor) this.showTwoFactor = true;
+                    this.twoFactorAction()
+                }                
+                this.proceedToMain()
+            }
             else this.signUp();
+        },
+        proceedToMain() {
+            if (this.is2FACompleted) {
+                if (this.generatedTwoFactorCode == this.twoFactorCode) {
+                    this.$router.push({ 'name': 'MainView' });
+                } else {
+                    this.errorMessage = 'El código es incorrecto.'
+                }
+                
+            }
+        },
+        twoFactorAction() {
+            if (this.bypassTwoFactor) this.$router.push({ 'name': 'MainView' });
+            else {
+                this.$store.dispatch('getTwoFactor').then((res: { code: string }) => {
+                    this.generatedTwoFactorCode = res.code;
+                })
+            }
+        },
+        send2FACode() {
+            this.$store.dispatch('getTwoFactor')
         },
         logIn() {
             if (!this.isCompleted) return;
@@ -71,7 +129,8 @@ export default defineComponent({
                     localStorage.setItem('accessToken', res.data.access);
                     localStorage.setItem('refreshToken', res.data.refresh);
                     this.$store.dispatch('getUserData');
-                    this.$router.push({ 'name': 'MainView' });
+                    // this.showTwoFactor = true;
+                    // this.$router.push({ 'name': 'MainView' });
                 })
                 .catch(e => {
                     if (e.response.status == 401) {

@@ -172,6 +172,14 @@ export default createStore({
                 console.log(error)
             }
         },
+        async getTwoFactor(context: ActionContext<AppState, AppState>) {
+            try {
+                const response = await apiService.post('api/users/two_factor/', {});    
+                return response.data
+            } catch (error) {
+                console.log(error)
+            }
+        },
         async fetchBrands(context: ActionContext<AppState, AppState>) {
             try {
                 const response = await apiService.get('api/vehicles/brands/');    
