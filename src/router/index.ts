@@ -3,6 +3,7 @@ import MainView from '@/views/MainView.vue'
 import NotFoundView from '@/views/404View.vue'
 
 import Trips from '@/views/Trips/Trips.vue'
+import TripDetailRoute from '@/views/TripDetailRoute.vue'
 
 import DriverPayments from '@/views/Payments/DriverPayments.vue'
 
@@ -127,6 +128,14 @@ const router = createRouter({
         requiresAuth: true
       },
       component: DriverDetailRoute
+    },
+    {
+      path: '/trips/:id',
+      name: 'TripDetailRoute',
+      meta: {
+        requiresAuth: true
+      },
+      component: TripDetailRoute
     },
     {
       path: '/driver/routes',

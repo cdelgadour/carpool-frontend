@@ -18,6 +18,7 @@
                     :min-date="todayDate"
                     :max-date="limitDate"
                     v-model="chosenDate"
+                    :enable-time-picker="false"
                     ></VueDatePicker>
             </div>
         </div>
@@ -25,7 +26,7 @@
             <div class="col-8">
                 <label for=""><strong>Tipo de viaje</strong></label><br>
                 <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="0" v-model="chosenType">
+                    <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="2" v-model="chosenType">
                     <label class="form-check-label" for="inlineRadio1">Desde UNPHU</label>
                 </div>
                 <div class="form-check form-check-inline">
@@ -34,19 +35,19 @@
                 </div>
             </div>
             <div class="col-4">
-                <button class="btn btn-primary">
-                    Buscar
+                <button :disabled="!applyFilter"  @click="toggleFilter" :class="onFilter ? 'btn-danger' : 'btn-primary'" class="btn">
+                    {{ !onFilter ? 'Buscar' : 'Remover'}}
                 </button>
             </div>
         </div>
         <hr>
         <div class="row">
             <div class="col-12">
-                <div class="card px-3 py-3 mb-3" v-for="trip in trips" :key="trip.id" @click="goToDetail(trip.id)">
+                <div class="card px-3 py-3 mb-3" v-for="trip in filteredTrips" :key="trip.id" @click="goToDetail(trip.id)">
                     <p class="mb-1"><strong>Viaje #{{ trip.id }}</strong></p>
                     <p class="m-0"><strong>Tipo de Viaje:</strong> {{ trip.trip_type == 1 ? 'Hacia UNPHU' : 'Desde UNPHU'}}</p>
                     <p class="m-0"><strong>Fecha:</strong> {{ formattedDate(trip.scheduled_date) }}</p>
-                    <p class="m-0"><strong>Estatus:</strong> {{ selectedDecisionChoice(trip.status) }}</p>
+                    <p class="m-0"><strong>Estatus:</strong> {{ trip.status ? selectedDecisionChoice(trip.status) : '' }}</p>
                 </div>
             </div>
         </div>
@@ -54,7 +55,7 @@
 </template>
 
 <script lang="ts">
-import type { NamedChoices } from '@/models/CommonModels';
+import type { NamedChoices, Trip } from '@/models/CommonModels';
 import { defineComponent } from 'vue';
 import { mapGetters } from 'vuex';
 
@@ -62,8 +63,9 @@ export default defineComponent({
     data() {
         return {
             message: '< Ir atrás',
-            chosenDate: '',
-            chosenType: 0
+            chosenDate: null,
+            chosenType: null,
+            onFilter: false
         }
     },
     computed: {
@@ -77,16 +79,36 @@ export default defineComponent({
         limitDate() {
             return new Date(Date.now() + (7 * 24 * 60 * 60 * 1000))
         },
+        applyFilter() {
+            return this.chosenDate && this.chosenType
+        },
+        filteredTrips() {
+            if (this.applyFilter && this.onFilter) {
+                let selectedDate = (this.chosenDate as any).toISOString().slice(0,10);
+                let filtered = this.trips.filter((t: Trip) => (t.scheduled_date as any).slice(0, 10) == selectedDate)
+                                .filter((t: Trip) => t.trip_type == this.chosenType)
+                return filtered
+            }
+            return this.trips
+        }
     },
     mounted() {
         this.$store.dispatch('getDriverTrips')
     },
     methods: {
+        toggleFilter() {
+            if (this.onFilter) {
+                this.chosenDate = null;
+                this.chosenType = null;
+            }
+            this.onFilter = !this.onFilter
+        },
         formattedDate(date: string) {
+            if (!date) return;
             return date.replace('T', ' ').replace('Z', '');
         },
         goToDetail(id: string) {
-            this.$router.push({ name: 'DriverDetailRoute', params: { id: id }})
+            this.$router.push({ name: 'TripDetailRoute', params: { id: id }})
         },
         goBack() {
             this.$router.push({ name: 'MainView' })

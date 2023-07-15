@@ -48,6 +48,7 @@ interface AppState {
     loadedCreateRouteMap: boolean,
     tripDetail: TripDetail[],
     loading: boolean,
+    showSuccessModal: boolean
 }
 
 const initialState = {
@@ -64,7 +65,8 @@ const initialState = {
     trips: [],
     loadedCreateRouteMap: false,
     tripDetail: [],
-    loading: false
+    loading: false,
+    showSuccessModal: false
 } as AppState
 
 const apiService = new APIService();
@@ -75,6 +77,9 @@ export default createStore({
         return {...initialState}
     },
     getters: {
+        getSuccessModal(state): Boolean {
+            return state.showSuccessModal
+        },
         getVehicleBrands(state) : Brand[] {
             return state.brands
         },
@@ -169,6 +174,9 @@ export default createStore({
         },
         SET_IS_LOADING(state: AppState, data: boolean) {
             state.loading = data
+        },
+        SET_SUCCESS_MODAL(state: AppState, data: boolean) {
+            state.showSuccessModal = data
         },
     },
     actions: {

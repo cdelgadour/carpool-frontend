@@ -18,6 +18,7 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import 'vue-toast-notification/dist/theme-sugar.css';
 import '@vuepic/vue-datepicker/dist/main.css'
 import 'vue-loading-overlay/dist/css/index.css';
+import 'animate.css';
 
 const app = withUUID(createApp(App));
 
