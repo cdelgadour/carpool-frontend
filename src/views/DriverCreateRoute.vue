@@ -127,6 +127,7 @@ export default defineComponent({
     methods:{
         selectTripType(value: number) {
             this.tripType = value;
+            console.log(this.direction.setDestination('Universidad Nacional Pedro Henriquez Urena'));
         },
         initialState() {
             this.routeConfirmModalMsg = '¿Deseas confirmar el viaje?';
@@ -161,7 +162,7 @@ export default defineComponent({
                 this.direction.on('route', this.updateRoute);
             }
             
-            setTimeout(() => this.direction.setDestination('Universidad Nacional Pedro Henriquez Urena'), 500)
+            // setTimeout(() => this.direction.setDestination('Universidad Nacional Pedro Henriquez Urena'), 500)
             this.$store.commit('SET_LOADED_CREATE_ROUTE_MAP');
         },
         testCalled(feature: any) {
@@ -226,13 +227,17 @@ export default defineComponent({
         }
     },
     mounted() {
-        // this.direction.off('destination', this.testCalled);
+        // this.map.remove();
         const modalElement = document.getElementById('confirmModal');
         if (modalElement && modalElement instanceof Element) {
             this.modalInstance = new Modal(modalElement)
         }
         this.loadMap();
-        // this.getUniversityCoordinates();
+    },
+    beforeUnmount() {
+        this.map.removeControl(this.direction);
+        this.map.remove();
+        // this.direction.remove();
     }
 })
 </script>

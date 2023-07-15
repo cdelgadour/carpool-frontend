@@ -34,6 +34,7 @@
 </template>
 
 <script lang="ts">
+import { faL } from '@fortawesome/free-solid-svg-icons';
 import { defineComponent } from 'vue';
 import { mapGetters } from 'vuex';
 
@@ -43,6 +44,9 @@ export default defineComponent({
             isDriver: 'getIsDriver'
         })
     },
+    mounted() {
+        this.$store.commit('SET_IS_LOADING', false)
+    },  
     methods: {
         goTo(routeName: string) {
             this.$router.push({ name: routeName})

@@ -80,4 +80,8 @@ nav {
 nav >>> a {
     color: white;
 }
+
+a {
+    color: white !important;
+}
 </style>

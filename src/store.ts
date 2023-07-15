@@ -46,7 +46,8 @@ interface AppState {
     interruptGet: boolean,
     trips: Trip[],
     loadedCreateRouteMap: boolean,
-    tripDetail: TripDetail[]
+    tripDetail: TripDetail[],
+    loading: boolean,
 }
 
 const initialState = {
@@ -62,7 +63,8 @@ const initialState = {
     interruptGet: false,
     trips: [],
     loadedCreateRouteMap: false,
-    tripDetail: []
+    tripDetail: [],
+    loading: false
 } as AppState
 
 const apiService = new APIService();
@@ -75,6 +77,9 @@ export default createStore({
     getters: {
         getVehicleBrands(state) : Brand[] {
             return state.brands
+        },
+        getIsLoading(state) : boolean {
+            return state.loading;
         },
         getVehicleModels(state) : Model[] {
             return state.models
@@ -161,7 +166,10 @@ export default createStore({
         },
         SET_INTERRUPT_LOAD(state: AppState) {
             state.interruptGet = !state.interruptGet
-        }
+        },
+        SET_IS_LOADING(state: AppState, data: boolean) {
+            state.loading = data
+        },
     },
     actions: {
         async getUserData(context: ActionContext<AppState, AppState>) {

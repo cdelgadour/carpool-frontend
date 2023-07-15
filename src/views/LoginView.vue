@@ -98,10 +98,12 @@ export default defineComponent({
         },
         proceedToMain() {
             if (this.is2FACompleted) {
+                this.$store.commit('SET_IS_LOADING', true)
                 if (this.generatedTwoFactorCode == this.twoFactorCode) {
                     this.$router.push({ 'name': 'MainView' });
                 } else {
                     this.errorMessage = 'El código es incorrecto.'
+                    this.$store.commit('SET_IS_LOADING', false)
                 }
                 
             }

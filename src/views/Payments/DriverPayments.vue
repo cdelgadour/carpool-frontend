@@ -53,6 +53,13 @@ import { mapGetters } from 'vuex';
 import { CommonUtils } from '@/utils/CommonUtils';
 
 export default defineComponent({
+    data() {
+        return {
+            todayDate: null,
+            limitDate: null,
+            chosenDate: null
+        }
+    },
     methods: {
         formatDate(date: string) {
             return CommonUtils.formatDate(date);
