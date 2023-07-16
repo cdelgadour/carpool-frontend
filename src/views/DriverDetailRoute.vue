@@ -86,6 +86,7 @@ export default defineComponent({
             user: 'getUserData',
             trips: 'getDriverTrips',
             tripStatusList: 'getTripStatus'
+
         }),
         showDistanceError() {
             if (this.userSelectedPoint && Object.keys(this.userSelectedPoint).length) {

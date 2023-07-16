@@ -1,6 +1,6 @@
 <template>
     <div class="container">
-        <h3>Confirmar selección</h3>
+        <h3>{{ readOnly ? 'Tu selección' : 'Confirmar selección'}}</h3>
         <div class="row">
             <div class="col-md-12">
                 <div>
@@ -10,9 +10,9 @@
                             <div class="row px-0">
                                 <p class="p-0 m-0 mb-0"><strong>Fecha y hora: </strong>{{ offsetDateTime }}</p>
                                 <p class="p-0 m-0 mb-0"><strong>Estado: </strong>{{ selectedDecisionChoice }}</p>
-                                <p class="p-0 m-0 mb-3"><strong>Asientos disponibles: </strong>{{ selectedTrip.available_seats }}</p>
-                                <p class="p-0 m-0 mb-1"><strong>Selecciona el punto de encuentro</strong></p>
-                                <p class="p-0 m-0 mb-2 text-danger">{{ showDistanceError ? 'Elige un punto más cercano a la ruta.' : '&nbsp;' }}</p>
+                                <p v-if="!readOnly" class="p-0 m-0 mb-3"><strong>Asientos disponibles: </strong>{{ selectedTrip.available_seats }}</p>
+                                <p v-if="!readOnly" class="p-0 m-0 mb-1"><strong>Selecciona el punto de encuentro</strong></p>
+                                <p v-if="!readOnly" class="p-0 m-0 mb-2 text-danger">{{ showDistanceError ? 'Elige un punto más cercano a la ruta.' : '&nbsp;' }}</p>
                             </div>
                         </div>
                     </div>
@@ -20,13 +20,22 @@
                 </div>
             </div> 
         </div>
-        <div class="row">
+        <div v-if="!readOnly" class="row">
             <div class="col-4">
                 <button @click="goToMain" class="btn btn-danger mt-3">Cancelar</button>
             </div>
             <div class="col-4"></div>
             <div class="col-4">
                 <button :disabled="!isCompleted" @click="showModal" class="btn btn-primary mt-3">Confirmar</button>
+            </div>
+        </div>
+        <div v-else class="row">
+            <div class="col-4">
+                <button @click="goToMain" class="btn btn-danger mt-3">Cancelar</button>
+            </div>
+            <div class="col-4"></div>
+            <div class="col-4">
+                <button @click="goToUserTrips" class="btn btn-primary mt-3 w-100">Ir atrás</button>
             </div>
         </div>
         
@@ -82,6 +91,8 @@ export default defineComponent({
             modalInstance: null as Modal | null,
             routeConfirmModalMsg: '¿Deseas confirmar tu punto de encuentro?',
             routeCreationError: false,
+            readOnly: false,
+            dummy: {"type":"Feature","geometry":{"type":"Point","coordinates":[-69.95846109686937,18.468832583600875]},"properties":{"featureIndex":50,"distanceToPoint":0.07576463364933643}}
         }
     },
     computed: {
@@ -89,6 +100,7 @@ export default defineComponent({
             user: 'getUserData',
             trips: 'getDriverTrips',
             tripStatusList: 'getTripStatus',
+            userPickup: 'getUserTripDetail'
         }),
         showDistanceError() {
             if (this.userSelectedPoint && Object.keys(this.userSelectedPoint).length) {
@@ -103,6 +115,11 @@ export default defineComponent({
         },
         selectedTrip() {
             const selectedId = this.$route.params.id;
+            const readOnly = this.$route.query['readOnly']
+            this.readOnly = readOnly ? true : false
+            // new mapboxgl.Marker()
+            //     .setLngLat([this.dummy.geometry.coordinates[0], this.dummy.geometry.coordinates[1]])
+            //     .addTo(this.map);
             if (this.trips) return this.trips.find((trip: Trip) => trip.id.toString() == selectedId)
             return []
         },
@@ -181,6 +198,11 @@ export default defineComponent({
                 .setLngLat([point[0], point[1]])
                 .addTo(this.map);
             }
+            if (this.userPickup) {
+                new mapboxgl.Marker()
+                .setLngLat([this.dummy.geometry.coordinates[0], this.dummy.geometry.coordinates[1]])
+                .addTo(this.map);
+            }
         },
         initialState() {
             this.routeConfirmModalMsg = '¿Deseas confirmar tu punto de partida?';
@@ -188,12 +210,13 @@ export default defineComponent({
             this.hideModal()
         },
         loadMap() {
+            const readOnly = this.$route.query['readOnly']
             mapboxgl.accessToken = 'pk.eyJ1IjoiY2RlbGdhZG91bnBodSIsImEiOiJjbGVhcmV1eDgwOXU0M3BvZDB6b3UwaW5kIn0.9AuJG-JNVlHwoSH9C8Pr2A';
             this.map = new mapboxgl.Map({
                 container: 'container-map',
                 style: 'mapbox://styles/mapbox/streets-v11',
                 center: [-69.95, 18.47],
-                zoom: 13
+                zoom: 13,
             });
 
             this.map.on('load', () => {
@@ -203,9 +226,11 @@ export default defineComponent({
 
             this.map.on('click', (e) => {
                 if (Object.keys(this.userSelectedMarker).length) this.userSelectedMarker.remove();
-                this.userSelectedMarker = new mapboxgl.Marker()
+                if (!readOnly) {
+                    this.userSelectedMarker = new mapboxgl.Marker()
                                             .setLngLat([e.lngLat.lng, e.lngLat.lat])
                                             .addTo(this.map);
+                }
             })
         },
         calculateMarkerToNearestPoint() {
@@ -231,6 +256,9 @@ export default defineComponent({
         },
         showModal() {
             this.modalInstance?.show()
+        },
+        goToUserTrips() {
+            this.$router.push({ name: 'DriverRouteList' })
         },
         hideModal() {
             const modalElement = document.getElementById('confirmModal');

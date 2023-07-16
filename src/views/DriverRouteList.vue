@@ -1,12 +1,22 @@
 <template>
     <div class="container">
-        <h3 class="mt-3 p-0 mx-0">Mis viajes agendados</h3>
         <div class="row">
-            <div class="col-12 card mt-3" v-for="trip in trips" :key="trip.id" @click="goToDetail(trip.id)">
-                <p>Viaje #{{ trip.id }}</p>
-                <p>Tipo de Viaje: {{ trip.trip_type == 1 ? 'Hacia UNPHU' : 'Desde UNPHU'}}</p>
-                <p>Fecha pautada: {{ trip.scheduled_date }}</p>
-                <p>Estatus: <strong>{{ selectedDecisionChoice(trip.status) }}</strong></p>
+            <span @click="goBack" class="mb-3">
+                <fa :icon="['fas', 'chevron-left']" style="color: var(--unphu-blue)" size="xl"/><br>
+            </span>
+            <div class="col">
+                <h3 class="p-0 mx-0 mb-0">Mis viajes</h3>
+            </div>
+        </div>
+        <hr>
+        <div class="row">
+            <div class="col-12">
+                <div class="card px-3 py-3 mb-3" v-for="trip in userTrips" :key="trip.trip.id" @click="goToDetail(trip.trip.id, trip.id)">
+                    <p class="mb-1"><strong>Viaje #{{ trip.trip.id }}</strong></p>
+                    <p class="m-0"><strong>Tipo de Viaje:</strong> {{ trip.trip_type == 1 ? 'Hacia UNPHU' : 'Desde UNPHU'}}</p>
+                    <p class="m-0"><strong>Fecha:</strong> {{ formattedDate(trip.trip.scheduled_date) }}</p>
+                    <p class="m-0"><strong>Estatus:</strong> {{ trip.trip.status ? selectedDecisionChoice(trip.trip.status) : '' }}</p>
+                </div>
             </div>
         </div>
     </div>
@@ -21,15 +31,26 @@ export default defineComponent({
     computed: {
         ...mapGetters({
             trips: 'getDriverTrips',
+            userTrips: 'getUserTrips',
             tripStatusList: 'getTripStatus'
         })
     },
     mounted() {
+        this.$store.dispatch('getUserTrips')
         this.$store.dispatch('getDriverTrips')
+        this.$store.commit('SET_SELECTED_USER_TRIP_DETAIL', null);
     },
     methods: {
-        goToDetail(id: string) {
-            this.$router.push({ name: 'DriverDetailRoute', params: { id: id }})
+        formattedDate(value: string) {
+            return 'Fecha'
+        },
+        goBack() {
+            this.$router.push({ name: 'MainView' })
+        },
+        goToDetail(id: string, detail_id: string) {
+            const trip = this.userTrips.filter((t: any) => t.id == detail_id)[0];
+            this.$store.commit('SET_SELECTED_USER_TRIP_DETAIL', trip.pickup_place);
+            this.$router.push({ name: 'TripDetailRoute', params: { id: id }, query: { readOnly: 'true' }})
         },
         selectedDecisionChoice(id: string) {
             if (this.tripStatusList) {

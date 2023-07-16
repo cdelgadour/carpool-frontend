@@ -48,7 +48,9 @@ interface AppState {
     loadedCreateRouteMap: boolean,
     tripDetail: TripDetail[],
     loading: boolean,
-    showSuccessModal: boolean
+    showSuccessModal: boolean,
+    userTrips: Trip[],
+    selectedUserTripDetail: any
 }
 
 const initialState = {
@@ -66,7 +68,9 @@ const initialState = {
     loadedCreateRouteMap: false,
     tripDetail: [],
     loading: false,
-    showSuccessModal: false
+    showSuccessModal: false,
+    userTrips: [],
+    selectedUserTripDetail: null
 } as AppState
 
 const apiService = new APIService();
@@ -79,6 +83,12 @@ export default createStore({
     getters: {
         getSuccessModal(state): Boolean {
             return state.showSuccessModal
+        },
+        getUserTripDetail(state): any {
+            return state.selectedUserTripDetail
+        },
+        getUserTrips(state): Trip[] {
+            return state.userTrips
         },
         getVehicleBrands(state) : Brand[] {
             return state.brands
@@ -177,6 +187,12 @@ export default createStore({
         },
         SET_SUCCESS_MODAL(state: AppState, data: boolean) {
             state.showSuccessModal = data
+        },
+        SET_USER_TRIPS(state: AppState, data: Trip[]) {
+            state.userTrips = data
+        },
+        SET_SELECTED_USER_TRIP_DETAIL(state: AppState, data: any) {
+            state.selectedUserTripDetail = data
         },
     },
     actions: {
@@ -302,6 +318,16 @@ export default createStore({
             try {
                 let response = await apiService.get(`api/trips/`)
                 context.commit('SET_TRIPS', response.data)
+            } catch (error) {
+                console.log(error)
+            }            
+        },
+        async getUserTrips(context: ActionContext<AppState, AppState>) {
+            const userId = context.state.user.id;
+            
+            try {
+                let response = await apiService.get(`api/trips-detail/`)
+                context.commit('SET_USER_TRIPS', response.data)
             } catch (error) {
                 console.log(error)
             }            
