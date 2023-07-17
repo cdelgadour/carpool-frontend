@@ -30,25 +30,56 @@
                 </div>
             </div>
         </div>
+        <div v-if="activeTrip" @click="goToActiveTrip" class="current-trip text-center p-3 animate__animated animate__pulse">
+            <p>Ya ha iniciado un viaje al que perteneces!</p>
+            <p><strong>Ir a viaje en curso</strong></p>
+        </div>
     </div>
 </template>
 
 <script lang="ts">
-import { faL } from '@fortawesome/free-solid-svg-icons';
+import type { Trip, TripDetail } from '@/models/CommonModels';
 import { defineComponent } from 'vue';
 import { mapGetters } from 'vuex';
 
 export default defineComponent({
+    data() {
+        return {
+            selectedTripDetail: null,
+            selectedTrip: null
+        }
+    },
     computed: {
         ...mapGetters({
-            isDriver: 'getIsDriver'
-        })
+            isDriver: 'getIsDriver',
+            userTrips: 'getUserTrips',
+            driverTrips: 'getDriverTrips'
+        }),
+        activeTrip() {
+            if (this.userTrips && this.driverTrips) {
+                const trips = this.driverTrips.filter((t: Trip) => t.status == 2).map((t: Trip) => t.id);
+                const userTrips = this.userTrips.filter((t: TripDetail) => trips.includes((t.trip as any).id))
+                
+                if (userTrips.length > 0) {
+                    this.selectedTripDetail = this.userTrips.find((t: TripDetail) => userTrips[0].id);
+                    this.$store.commit('SET_SELECTED_USER_TRIP_DETAIL', this.selectedTripDetail);
+                    this.selectedTrip = userTrips[0].trip.id;
+                }
+                return userTrips.length > 0
+            }
+            return false
+        }
     },
     mounted() {
+        this.$store.dispatch('getDriverTrips');
+        this.$store.dispatch('getUserTrips');
         this.$store.commit('SET_IS_LOADING', false)
         this.$store.commit('SET_SUCCESS_MODAL', false);
     },  
     methods: {
+        goToActiveTrip() {
+            this.$router.push({ name: 'UserActiveTrip', params: { id: this.selectedTrip }})
+        },
         goTo(routeName: string) {
             this.$router.push({ name: routeName})
         }
@@ -59,10 +90,22 @@ export default defineComponent({
 
 
 <style scoped>
+
 .create-bttn {
     background-color: white;
     border: 1px solid var(--unphu-green);
     color: var(--unphu-green);
+}
+.current-trip {
+    color: white;
+    border: 1px solid var(--unphu-green);
+    background-color: var(--unphu-green);
+    border-radius: 5px;
+    animation-iteration-count: infinite;
+    cursor: pointer;
+}
+.current-trip > p{
+    margin: 0;
 }
 .search-bttn {
     background-color: white;

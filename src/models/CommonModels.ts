@@ -64,6 +64,7 @@ export interface Trip {
 }
 
 export interface TripDetail {
+    id: string,
     trip: string,
     pickup_place: any,
     destination: string
