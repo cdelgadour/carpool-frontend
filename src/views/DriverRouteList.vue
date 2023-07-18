@@ -10,12 +10,20 @@
         </div>
         <hr>
         <div class="row">
-            <div class="col-12">
+            <div class="col-12" v-if="!isDriver">
                 <div class="card px-3 py-3 mb-3" v-for="trip in userTrips" :key="trip.trip.id" @click="goToDetail(trip.trip.id, trip.id)">
                     <p class="mb-1"><strong>Viaje #{{ trip.trip.id }}</strong></p>
                     <p class="m-0"><strong>Tipo de Viaje:</strong> {{ trip.trip_type == 1 ? 'Hacia UNPHU' : 'Desde UNPHU'}}</p>
                     <p class="m-0"><strong>Fecha:</strong> {{ formattedDate(trip.trip.scheduled_date) }}</p>
                     <p class="m-0"><strong>Estatus:</strong> {{ trip.trip.status ? selectedDecisionChoice(trip.trip.status) : '' }}</p>
+                </div>
+            </div>
+            <div class="col-12" v-else>
+                <div class="card px-3 py-3 mb-3" v-for="trip in trips" :key="trip.id" @click="goToDetailTrip(trip.id)">
+                    <p class="mb-1"><strong>Viaje #{{ trip.id }}</strong></p>
+                    <p class="m-0"><strong>Tipo de Viaje:</strong> {{ trip.trip_type == 1 ? 'Hacia UNPHU' : 'Desde UNPHU'}}</p>
+                    <p class="m-0"><strong>Fecha:</strong> {{ formattedDate(trip.scheduled_date) }}</p>
+                    <p class="m-0"><strong>Estatus:</strong> {{ trip.status ? selectedDecisionChoice(trip.status) : '' }}</p>
                 </div>
             </div>
         </div>
@@ -32,8 +40,15 @@ export default defineComponent({
         ...mapGetters({
             trips: 'getDriverTrips',
             userTrips: 'getUserTrips',
-            tripStatusList: 'getTripStatus'
-        })
+            tripStatusList: 'getTripStatus',
+            isDriver: 'getIsDriver'
+        }),
+        filteredTrips() {
+            if (this.isDriver) {
+                return this.trips
+            }
+            return this.userTrips
+        }
     },
     mounted() {
         this.$store.dispatch('getUserTrips')
@@ -52,6 +67,9 @@ export default defineComponent({
             this.$store.commit('SET_SELECTED_USER_TRIP_DETAIL', trip.pickup_place);
             this.$router.push({ name: 'TripDetailRoute', params: { id: id }, query: { readOnly: 'true' }})
         },
+        goToDetailTrip(id: string) {
+            this.$router.push({ name: 'DriverDetailRoute', params: { id: id }})
+        },
         selectedDecisionChoice(id: string) {
             if (this.tripStatusList) {
                 return this.tripStatusList.find((tripStatus: NamedChoices) => tripStatus.id == id).name;
@@ -63,5 +81,7 @@ export default defineComponent({
 </script>
 
 <style scoped>
-
+.card {
+    cursor: pointer;
+}
 </style>

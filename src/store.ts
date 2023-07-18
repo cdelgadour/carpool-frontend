@@ -196,7 +196,6 @@ export default createStore({
             state.showSuccessModal = data
         },
         SET_SUCCESS_MODAL_MESSAGE(state: AppState, data: string) {
-            console.log(data);
             state.successModalMessage = data
         },
         SET_USER_TRIPS(state: AppState, data: Trip[]) {

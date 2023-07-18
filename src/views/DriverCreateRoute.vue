@@ -99,6 +99,7 @@ export default defineComponent({
             UNPHU: {"id":"poi.498216230466","type":"Feature","place_type":["poi"],"relevance":0.8,"properties":{"foursquare":"4bec1ab861aca59364cb8500","landmark":true,"address":"Av.john f.kennedy KM 6 1/2","category":"college, university","maki":"college"},"text":"Universidad Nacional Pedro Henríquez Ureña (UNPHU)","place_name":"Universidad Nacional Pedro Henríquez Ureña (UNPHU), Av.john f.kennedy KM 6 1/2, Santo Domingo de Guzmán, Distrito Nacional, Dominican Republic","center":[-69.948492,18.484636],"geometry":{"coordinates":[-69.948492,18.484636],"type":"Point"},"context":[{"id":"locality.12413503","mapbox_id":"dXJuOm1ieHBsYzp2V28v","text":"Los Jardines"},{"id":"place.1116223","wikidata":"Q34820","mapbox_id":"dXJuOm1ieHBsYzpFUWcv","text":"Santo Domingo de Guzmán"},{"id":"region.197695","short_code":"DO-01","wikidata":"Q2499228","mapbox_id":"dXJuOm1ieHBsYzpBd1Ev","text":"Distrito Nacional"},{"id":"country.8767","short_code":"do","wikidata":"Q786","mapbox_id":"dXJuOm1ieHBsYzpJajg","text":"Dominican Republic"}]} as AddressSuggestion,
             direction: {},
             modalInstance: null as Modal | null,
+            successModalInstance: null as Modal | null,
             routeConfirmModalMsg: '¿Deseas confirmar el viaje?',
             routeCreationError: false,
             tripType: null as null | number
@@ -127,7 +128,7 @@ export default defineComponent({
     methods:{
         selectTripType(value: number) {
             this.tripType = value;
-            console.log(this.direction.setDestination('Universidad Nacional Pedro Henriquez Urena'));
+            this.direction.setDestination('Universidad Nacional Pedro Henriquez Urena')
         },
         initialState() {
             this.routeConfirmModalMsg = '¿Deseas confirmar el viaje?';
@@ -212,10 +213,14 @@ export default defineComponent({
             
             this.$store.dispatch('createTrip', data)
                 .then(success => {
-                    console.log(success);
+                    this.$store.commit('SET_SUCCESS_MODAL_MESSAGE', "Viaje creado con éxito!");
+                    this.hideModal();
+                    this.showSuccessModal();
                     if (success) {
-                        this.hideModal();
-                        this.$router.push({name: 'MainView'});
+                        setTimeout(() => {
+                            this.hideSuccessModal();
+                            this.$router.push({name: 'MainView'});
+                        }, 2000)
                     } else {
                         this.routeConfirmModalMsg = 'Ocurrió un error al guardar el viaje.'
                         this.routeCreationError = true;
@@ -224,20 +229,27 @@ export default defineComponent({
         },
         goToMain() {
             this.$router.push({name: 'MainView'});
+        },
+        showSuccessModal() {
+            this.successModalInstance?.show()
+        },
+        hideSuccessModal() {
+            this.successModalInstance?.hide()
         }
     },
     mounted() {
-        // this.map.remove();
         const modalElement = document.getElementById('confirmModal');
         if (modalElement && modalElement instanceof Element) {
             this.modalInstance = new Modal(modalElement)
         }
+        const successModalElement = document.getElementById('successModal');
+        if (successModalElement && successModalElement instanceof Element) {
+            this.successModalInstance = new Modal(successModalElement)
+        }
         this.loadMap();
     },
     beforeUnmount() {
-        this.map.removeControl(this.direction);
         this.map.remove();
-        // this.direction.remove();
     }
 })
 </script>

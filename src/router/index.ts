@@ -21,6 +21,7 @@ import DriverDetailRoute from '@/views/DriverDetailRoute.vue'
 import DriverRouteList from '@/views/DriverRouteList.vue'
 import SearchRouteList from '@/views/SearchRouteList.vue'
 import UserActiveTrip from '@/views/UserActiveTrip.vue'
+import DriverActiveTrip from '@/views/DriverActiveTrip.vue'
 import UserFinishedTrip from '@/views/UserFinishedTrip.vue'
 import CreateReview from '@/views/CreateReview.vue'
 import store from '@/store'
@@ -170,6 +171,14 @@ const router = createRouter({
         requiresAuth: true
       },
       component: UserActiveTrip
+    },
+    {
+      path: '/driver/active-trip/:id',
+      name: 'DriverActiveTrip',
+      meta: {
+        requiresAuth: true
+      },
+      component: DriverActiveTrip
     },
     {
       path: '/finished-trip/',

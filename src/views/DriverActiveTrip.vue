@@ -1,6 +1,6 @@
 <template>
     <div class="container">
-        <h3>Detalles de tu viaje</h3>
+        <h3>Viaje en curso</h3>
         <div class="row">
             <div class="col-md-12">
                 <div>
@@ -8,51 +8,51 @@
                         <div class="container">
                             <div class="row px-0">
                                 <p class="p-0 m-0 mb-0"><strong>Fecha y hora: </strong>{{ offsetDateTime }}</p>
-                                <p class="p-0 m-0 mb-0"><strong>Estado: </strong>{{ selectedDecisionChoice }}</p>
-                                <p class="p-0 m-0"><strong>Asientos disponibles: </strong>{{ selectedTrip.available_seats ?  selectedTrip.available_seats - 1 : ''}}</p>
+                                <p class="p-0 m-0 mb-0"><strong>Estado: </strong>En curso</p>
+                                <hr v-if="showCodeBttn" class="mb-2">
+                                <button @click="codeHasBeenSent = !codeHasBeenSent" v-if="showCodeBttn" class="mb-2 btn btn-primary">{{ codeHasBeenSent ? 'Reenviar' : 'Enviar' }} código de seguridad</button>
+                                <p v-if="codeHasBeenSent" class="m-0 p-0">Introduce el código enviado al pasajero</p>
+                                <input v-if="codeHasBeenSent" type="text">
+                                <hr v-if="showCodeBttn">
                             </div>
                         </div>
                     </div>
+                    
                 </div>
             </div> 
         </div>
         <hr>
-        <div v-if="!passengersConfirmed" class="row align-items-center">
-            <div class="col-7">
-                <p class="mb-0"><strong>Francis Nuñez (FN)</strong></p>
-            </div>
-            <div class="col-5 d-flex justify-content-end">
-                <button @click="confirmPassenger" class="btn btn-primary mr-5">
-                    <fa :icon="['fas', 'check']" />
-                </button>
-                <button class="btn btn-danger" >
-                    <fa :icon="['fas', 'trash']" />
-                </button>
-            </div>
-        </div>
         <div v-if="passengersConfirmed" class="row align-items-center">
             <div class="col-7">
                 <p class="mb-0"><strong>Francis Nuñez (FN)</strong></p>
             </div>
             <div class="col-5 d-flex justify-content-end">
-                <button @click="confirmPassenger" class="btn btn-success mr-5">
-                    <fa :icon="['fas', 'check']" />
+                <button class="btn btn-secondary mr-5">
+                    Pendiente
                 </button>
             </div>
         </div>
-        <hr>
         <div class="row">
             <div class="col-md-12">
                 <div id="container-map"></div>
             </div>
         </div>
-        <div v-if="passengersConfirmed" class="row">
+        <div v-if="!readOnly" class="row">
+            <div class="col-4">
+                <button v-if="false" @click="goToMain" class="btn btn-danger mt-3 w-100">Atrás</button>
+            </div>
+            <div class="col-4"></div>
+            <div class="col-4">
+                <button v-if="false" :disabled="!isCompleted" @click="showModal" class="btn btn-primary mt-3">Confirmar</button>
+            </div>
+        </div>
+        <div v-else class="row">
             <div class="col-4">
                 <button @click="goToMain" class="btn btn-danger mt-3">Cancelar</button>
             </div>
             <div class="col-4"></div>
             <div class="col-4">
-                <button @click="showModal" class="btn btn-primary mt-3 w-100">Iniciar</button>
+                <button @click="goToUserTrips" class="btn btn-primary mt-3 w-100">Ir atrás</button>
             </div>
         </div>
         
@@ -63,7 +63,7 @@
                     <h5 class="modal-title" id="exampleModalLongTitle">Confirmar</h5>
                 </div>
                 <div class="modal-body">
-                    ¿Deseas iniciar el viaje?
+                    {{ routeConfirmModalMsg }}
                 </div>
                 <div class="modal-footer">
                     <button type="button" v-if="!routeCreationError" @click="hideModal" class="btn btn-danger" data-dismiss="modal">Cancelar</button>
@@ -83,9 +83,12 @@ import { defineComponent } from 'vue';
 import mapboxgl from 'mapbox-gl'
 import nearestPoint from '@turf/nearest-point';
 // import point from '@turf/helpers';
-import { feature, featureCollection, lineString, point, type Feature, type Units, } from '@turf/helpers';
+import { feature, featureCollection, lineString, point, type Feature, type Position, type Units } from '@turf/helpers';
 import pointToLineDistance from '@turf/point-to-line-distance';
 import along from '@turf/along'
+import { coordAll } from '@turf/meta'
+import bearing from '@turf/bearing'
+import turfLength from '@turf/length'
 import { getCoord } from '@turf/invariant'
 import { mapGetters } from 'vuex';
 import { Modal } from 'bootstrap';
@@ -106,18 +109,29 @@ export default defineComponent({
             accessToken: 'pk.eyJ1IjoiY2RlbGdhZG91bnBodSIsImEiOiJjbGVhcmV1eDgwOXU0M3BvZDB6b3UwaW5kIn0.9AuJG-JNVlHwoSH9C8Pr2A',
             direction: {},
             modalInstance: null as Modal | null,
-            routeConfirmModalMsg: '¿Deseas confirmar tu punto de partida?',
+            routeConfirmModalMsg: '¿Deseas confirmar tu punto de encuentro?',
             routeCreationError: false,
-            passengerMarker: null as any,
-            passengersConfirmed: false,
+            readOnly: false,
+            codeHasBeenSent: false,
+            positionMarker: null as any,
+            showCodeBttn: false,
+            animationSteps: 151,
+            animationCounter: 0,
+            animationRoute: {},
+            animationPoint: {},
+            adviceMessage: '',
+            lastCallTime: 0,
+            showCodeInput: false,
+            animationPointCollection: {},
+            dummy: {"type":"Feature","geometry":{"type":"Point","coordinates":[-69.95846109686937,18.468832583600875]},"properties":{"featureIndex":50,"distanceToPoint":0.07576463364933643}}
         }
     },
     computed: {
         ...mapGetters({
             user: 'getUserData',
             trips: 'getDriverTrips',
-            tripStatusList: 'getTripStatus'
-
+            tripStatusList: 'getTripStatus',
+            userPickup: 'getUserTripDetail'
         }),
         showDistanceError() {
             if (this.userSelectedPoint && Object.keys(this.userSelectedPoint).length) {
@@ -130,12 +144,13 @@ export default defineComponent({
           if (this.selectedTrip) return this.tripStatusList.find((r: NamedChoices) => r.id == this.selectedTrip.status).name;
           return 'Pendiente'
         },
-        confirmPassenger() {
-            this.passengersConfirmed = !this.passengersConfirmed;
-            this.passengerMarker.togglePopup();
-        },
         selectedTrip() {
             const selectedId = this.$route.params.id;
+            const readOnly = this.$route.query['readOnly']
+            this.readOnly = readOnly ? true : false
+            // new mapboxgl.Marker()
+            //     .setLngLat([this.dummy.geometry.coordinates[0], this.dummy.geometry.coordinates[1]])
+            //     .addTo(this.map);
             if (this.trips) return this.trips.find((trip: Trip) => trip.id.toString() == selectedId)
             return []
         },
@@ -150,19 +165,7 @@ export default defineComponent({
         },
         offsetDateTime() {
             if (this.selectedTrip && Object.keys(this.selectedTrip).length) {
-                let date = new Date(this.selectedTrip.scheduled_date);
-                let dateFormatted = new Intl.DateTimeFormat('en-US', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: false,
-                timeZone: 'America/New_York' // Or any other timezone that observes UTC-4
-                }).format(date);
-
-                return dateFormatted.replace(',', '')
+                return this.selectedTrip.scheduled_date.replace('T', ' ').replace('Z', '')
             }
             return ''
         }
@@ -194,6 +197,7 @@ export default defineComponent({
             return null
         },
         loadMarkers(data: any) {
+            return;
             new mapboxgl.Marker()
                 .setLngLat([data.origin[0], data.origin[1]])
                 .addTo(this.map);
@@ -201,6 +205,109 @@ export default defineComponent({
             new mapboxgl.Marker()
                 .setLngLat([data.destination[0], data.destination[1]])
                 .addTo(this.map);
+        },
+        initialSetup() {
+            const arc = [];
+            var steps = 5000;
+            const amountSteps = this.selectedTrip.route[0].legs[0].steps;
+            const origin = amountSteps[0];
+            const route = {
+                'type': 'FeatureCollection',
+                'features': [
+                    {
+                        'type': 'Feature',
+                        'geometry': {
+                            'type': 'LineString',
+                            'coordinates': [] as Position[]
+                        }
+                    }
+                ]
+            };
+            const geoPoint = {
+                    'type': 'Feature',
+                    'properties': {},
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': origin.intersections[0].location
+                    }
+            }
+            const lineDistance = this.selectedTrip.route[0].distance;
+            const pointCollection = this.selectedTrip.route[0].legs[0].steps.map((step: any) => {
+                return step.maneuver.location
+            })
+
+            const ls = lineString(pointCollection);
+
+            for (let i = 0; i < lineDistance; i += lineDistance / steps) {
+                const segment = along(ls, i);
+                arc.push(segment.geometry.coordinates);
+            }
+
+            route.features[0].geometry.coordinates = arc;
+
+            let counter = 0;
+            // this.animationPointCollection = route;
+            this.animationPoint = geoPoint;
+
+            this.onMapLoad();
+        },
+        onMapLoad() {
+            this.map.addSource('animation-point', {
+                'type': 'geojson',
+                'data': this.animationPoint
+            });
+            this.map.addLayer({
+                'id': 'animation-point',
+                'type': 'circle',
+                'source': 'animation-point'
+            });
+            this.calculateMarkerToNearestPoint()
+            this.animationPointCollection = coordAll(polyline.toGeoJSON(this.selectedTrip.route[0].geometry));
+            
+            // this.animate();
+            requestAnimationFrame(this.animate);
+        },
+        calculateBearing() {
+            const firstPointIndex = this.animationCounter >= this.animationSteps ? this.animationCounter - 1 : this.animationCounter;
+            const secondPointIndex = this.animationCounter >= this.animationSteps ? this.animationCounter : this.animationCounter + 1;
+            const firstPoint = point((this.animationPointCollection as any).features[firstPointIndex].geometry.coordinates)
+            const secondPoint = point((this.animationPointCollection as any).features[secondPointIndex].geometry.coordinates)
+            return bearing(firstPoint, secondPoint);
+        },
+        animate(time: number) {
+            var delay = 1000 / 20;
+            if (this.animationCounter == 42) {
+                this.showCodeBttn = !this.showCodeBttn
+                // this.adviceMessage = 'Te hemos enviado el código de seguridad, por favor pasarlo al conductor.'
+                // this.$notify({
+                //     title: "Código de seguridad UniRide",
+                //     text: "187309",
+                // });
+                setTimeout(() => {
+                    // this.adviceMessage = 'Se ha confirmado el código. Disfruta tu viaje!'
+                    // this.animationCounter = 43;
+                    // requestAnimationFrame(this.animate)
+                }, 5000)
+                return;
+            }
+            if (this.animationCounter < this.animationSteps) {
+                requestAnimationFrame(this.animate);
+
+                if (time - this.lastCallTime < delay) {
+                    return;
+                }
+                this.lastCallTime = time;
+
+                (this.animationPoint as any).geometry.coordinates = (this.animationPointCollection as any )[this.animationCounter];
+                this.map.getSource('animation-point').setData(this.animationPoint);
+                this.animationCounter = this.animationCounter + 1;
+            } else {
+                this.$store.commit('SET_IS_LOADING', true);
+                setTimeout(() => {
+                    this.$router.push({ name: 'UserFinishedTrip' })
+                }, 2000)
+            }
+            
         },
         addLayer() {
             this.map.addLayer({
@@ -226,6 +333,11 @@ export default defineComponent({
                 .setLngLat([point[0], point[1]])
                 .addTo(this.map);
             }
+            if (this.userPickup) {
+                this.positionMarker = new mapboxgl.Marker()
+                .setLngLat([this.dummy.geometry.coordinates[0], this.dummy.geometry.coordinates[1]])
+                .addTo(this.map);
+            }
         },
         initialState() {
             this.routeConfirmModalMsg = '¿Deseas confirmar tu punto de partida?';
@@ -233,41 +345,29 @@ export default defineComponent({
             this.hideModal()
         },
         loadMap() {
+            const readOnly = this.$route.query['readOnly']
             mapboxgl.accessToken = 'pk.eyJ1IjoiY2RlbGdhZG91bnBodSIsImEiOiJjbGVhcmV1eDgwOXU0M3BvZDB6b3UwaW5kIn0.9AuJG-JNVlHwoSH9C8Pr2A';
             this.map = new mapboxgl.Map({
                 container: 'container-map',
                 style: 'mapbox://styles/mapbox/streets-v11',
                 center: [-69.95, 18.47],
-                zoom: 12,
-                interactive: true
+                zoom: 13,
             });
 
             this.map.on('load', () => {
-                this.addLayer()
-                this.getOriginDestinationPoints()
-                this.setPredefinedRoute();
+                this.addLayer();
+                this.getOriginDestinationPoints();
+                this.initialSetup();
             })
-
-            // new mapboxgl.Marker()
-            //     .setLngLat([data.origin[0], data.origin[1]])
-            //     .addTo(this.map);
 
             this.map.on('click', (e) => {
-                console.log(e.lngLat.lng, e.lngLat.lat)
-                // if (Object.keys(this.userSelectedMarker).length) this.userSelectedMarker.remove();
-                // this.userSelectedMarker = new mapboxgl.Marker()
-                //                             .setLngLat([e.lngLat.lng, e.lngLat.lat])
-                //                             .addTo(this.map);
+                if (Object.keys(this.userSelectedMarker).length) this.userSelectedMarker.remove();
+                if (!readOnly) {
+                    // this.userSelectedMarker = new mapboxgl.Marker()
+                    //                         .setLngLat([e.lngLat.lng, e.lngLat.lat])
+                    //                         .addTo(this.map);
+                }
             })
-        },
-        setPredefinedRoute() {
-            this.passengerMarker = new mapboxgl.Marker()
-                .setLngLat([-69.95864230430901, 18.465757870799152])
-                .setPopup(new mapboxgl.Popup().setHTML("<h3>FN</h3>"))
-                                            .addTo(this.map);
-            this.passengerMarker.togglePopup();
-            // this.passengerMarker.getElement().textContent = 'FN';
-             
         },
         calculateMarkerToNearestPoint() {
             let pointCollection = this.selectedTrip.route[0].legs[0].steps.map((step: any) => {
@@ -278,20 +378,24 @@ export default defineComponent({
             const distance = this.selectedTrip.route[0].distance
             const options = { units: 'meters' as Units};
             const points = []
-            for (let i = 50; i < distance; i = i + 50) {
+            for (let i = 25; i < distance; i = i + 25) {
                 points.push(point(along(ls, i, options).geometry.coordinates))
             }
             const pointCol = featureCollection<Point>(points)
+            this.animationPointCollection = pointCol;
 
-            let pointCoordinates = this.userSelectedMarker.getLngLat()
-            let markerPoint = point([pointCoordinates.lng, pointCoordinates.lat])
-            this.userSelectedPoint = nearestPoint(markerPoint, pointCol);
+            // let pointCoordinates = this.userSelectedMarker.getLngLat()
+            // let markerPoint = point([pointCoordinates.lng, pointCoordinates.lat])
+            // this.userSelectedPoint = nearestPoint(markerPoint, pointCol);
         },
         updateRoute(routes: { route: Route }) {
             this.constructedRoute = routes.route
         },
         showModal() {
             this.modalInstance?.show()
+        },
+        goToUserTrips() {
+            this.$router.push({ name: 'DriverRouteList' })
         },
         hideModal() {
             const modalElement = document.getElementById('confirmModal');
@@ -311,26 +415,19 @@ export default defineComponent({
             const api_url = `https://api.mapbox.com/geocoding/v5/${endpoint}/${searchText}.json?access_token=pk.eyJ1IjoiY2RlbGdhZG91bnBodSIsImEiOiJjbGVhcmV1eDgwOXU0M3BvZDB6b3UwaW5kIn0.9AuJG-JNVlHwoSH9C8Pr2A`;            
         },
         saveData() {
-            this.hideModal();
-            this.$router.push({ name: 'DriverActiveTrip', params: { id: this.selectedTrip.id }})
-            return
             const data = {
                 trip: this.selectedTrip.id,
                 pickup_place: this.userSelectedPoint,
-                preferences: string,
-                code: string,
-                input_code: Boolean,
-                user: string,
-                amount_payed: Number,
-                payment_date: Date,
-                payment_status: Number
+                user: this.user.id
             }
 
             this.$store.dispatch('createTripDetail', data)
                 .then(success => {
                     console.log(success);
                     if (success) {
-                        this.$router.push({name: 'MainView'});
+                        this.hideModal()
+                        this.$store.commit('SET_SUCCESS_MODAL', true);
+                        setTimeout(() => this.$router.push({name: 'MainView'}), 2000)
                     } else {
                         this.routeConfirmModalMsg = 'Ocurrió un error al guardar el viaje.'
                         this.routeCreationError = true;
@@ -338,10 +435,13 @@ export default defineComponent({
                 })
         },
         goToMain() {
-            this.$router.push({name: 'DriverRouteList'});
-        }
+            this.$router.push({name: 'MainView'});
+        },
     },
     mounted() {
+        this.$store.dispatch('getUserTrips')
+        this.$store.dispatch('getDriverTrips')
+        // this.$store.commit('SET_IS_LOADING', true);
         const modalElement = document.getElementById('confirmModal');
         if (modalElement && modalElement instanceof Element) {
             this.modalInstance = new Modal(modalElement)
@@ -394,8 +494,17 @@ select {
   border-radius: 50%;
 }
 
-.btn.btn-primary.mr-5 {
-    margin-right: 20px;
+.background-unphu-blue {
+    background-color: var(--unphu-blue) !important;
+}
+
+.current-msg {
+    color: white;
+    border: 1px solid var(--unphu-green);
+    background-color: var(--unphu-green);
+    border-radius: 5px;
+    animation-iteration-count: infinite;
+    cursor: pointer;
 }
 
 </style>
