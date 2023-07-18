@@ -21,6 +21,7 @@ import DriverDetailRoute from '@/views/DriverDetailRoute.vue'
 import DriverRouteList from '@/views/DriverRouteList.vue'
 import SearchRouteList from '@/views/SearchRouteList.vue'
 import UserActiveTrip from '@/views/UserActiveTrip.vue'
+import UserFinishedTrip from '@/views/UserFinishedTrip.vue'
 import CreateReview from '@/views/CreateReview.vue'
 import store from '@/store'
 
@@ -169,6 +170,14 @@ const router = createRouter({
         requiresAuth: true
       },
       component: UserActiveTrip
+    },
+    {
+      path: '/finished-trip/',
+      name: 'UserFinishedTrip',
+      meta: {
+        requiresAuth: true
+      },
+      component: UserFinishedTrip
     },
     {
       path: '/:catchAll(.*)',

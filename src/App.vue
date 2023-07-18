@@ -2,6 +2,11 @@
   <app-header></app-header>
   <loading :active="isLoading"></loading>
   <auxModal></auxModal>
+  <notifications 
+    position="top center" 
+    width="100%"
+    classes="notification-blue"
+    />
   <div class="container mt-2 px-4">
     <div class="row">
       <div class="col-0 col-lg-2"></div>
@@ -66,4 +71,10 @@ export default defineComponent({
 
 <style>
 @import "vue-select/dist/vue-select.css";
+.notification-blue  {
+    font-size: 1em;
+    padding: 0.5em;
+    background-color: var(--unphu-blue) !important;
+    color: white !important;
+}
 </style>

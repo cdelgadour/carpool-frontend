@@ -7,7 +7,7 @@
             <div class="modal-body">
                 <div style="" class="text-center">
                     <img style="width: 75px" src="~@/assets/success-35.png" alt="">
-                    <p class="mt-3" style="font-size: 18px;"><strong>Fuiste añadido a este viaje!</strong></p>
+                    <p class="mt-3" style="font-size: 18px;"><strong>{{  successModalMessage  }}</strong></p>
                 </div>
             </div>
             <div class="modal-footer">
@@ -19,9 +19,16 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import { mapGetters } from 'vuex';
 
 
-export default defineComponent({})
+export default defineComponent({
+    computed: {
+        ...mapGetters({
+            successModalMessage: 'getSuccessModalMessage'
+        })
+    }
+})
 </script>
 
 <style>

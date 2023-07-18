@@ -30,7 +30,7 @@
                 </div>
             </div>
         </div>
-        <div v-if="activeTrip" @click="goToActiveTrip" class="current-trip text-center p-3 animate__animated animate__pulse">
+        <div v-if="activeTrip && !finishedTrip" @click="goToActiveTrip" class="current-trip text-center p-3 animate__animated animate__pulse">
             <p>Ya ha iniciado un viaje al que perteneces!</p>
             <p><strong>Ir a viaje en curso</strong></p>
         </div>
@@ -46,7 +46,8 @@ export default defineComponent({
     data() {
         return {
             selectedTripDetail: null,
-            selectedTrip: null
+            selectedTrip: null,
+            finishedTrip: false
         }
     },
     computed: {
@@ -75,6 +76,8 @@ export default defineComponent({
         this.$store.dispatch('getUserTrips');
         this.$store.commit('SET_IS_LOADING', false)
         this.$store.commit('SET_SUCCESS_MODAL', false);
+        this.finishedTrip = this.$route.query.finished ? true : false
+
     },  
     methods: {
         goToActiveTrip() {

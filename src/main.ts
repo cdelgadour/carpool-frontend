@@ -11,6 +11,7 @@ import vSelect from "vue-select";
 import withUUID from "vue-uuid";
 import VueDatePicker from '@vuepic/vue-datepicker'
 import { LoadingPlugin } from 'vue-loading-overlay'
+import Notifications from '@kyvg/vue3-notification'
 
 import './assets/main.css'
 import 'bootstrap/dist/js/bootstrap'
@@ -27,6 +28,7 @@ app.use(axiosPlugin)
 app.use(ToastPlugin)
 app.use(store);
 app.use(LoadingPlugin)
+app.use(Notifications)
 library.add(fas)
 app.component('fa', FontAwesomeIcon)
 app.component('v-select', vSelect)

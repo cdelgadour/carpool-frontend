@@ -256,11 +256,15 @@ export default defineComponent({
             var delay = 1000 / 20;
             if (this.animationCounter == 42) {
                 this.adviceMessage = 'Te hemos enviado el código de seguridad, por favor pasarlo al conductor.'
+                this.$notify({
+                    title: "Código de seguridad UniRide",
+                    text: "187309",
+                });
                 setTimeout(() => {
                     this.adviceMessage = 'Se ha confirmado el código. Disfruta tu viaje!'
                     this.animationCounter = 43;
                     requestAnimationFrame(this.animate)
-                }, 4000)
+                }, 5000)
                 return;
             }
             if (this.animationCounter < this.animationSteps) {
@@ -274,6 +278,11 @@ export default defineComponent({
                 (this.animationPoint as any).geometry.coordinates = (this.animationPointCollection as any )[this.animationCounter];
                 this.map.getSource('animation-point').setData(this.animationPoint);
                 this.animationCounter = this.animationCounter + 1;
+            } else {
+                this.$store.commit('SET_IS_LOADING', true);
+                setTimeout(() => {
+                    this.$router.push({ name: 'UserFinishedTrip' })
+                }, 2000)
             }
             
         },

@@ -1,6 +1,6 @@
 <template>
-    <h1>Reseña Viaje #1</h1>
-    <h3>Conductor: Pedro Jiménez</h3>
+    <h1>Reseña Viaje #12</h1>
+    <h3>Conductor: Emil Madera</h3>
     <p><strong>Fecha:</strong> 13/07/2023</p>
     <div class="row">
         <div class="col-1"></div>
@@ -17,7 +17,7 @@
         </div>
         <div class="col-4"></div>
         <div class="col-4">
-            <button class="btn btn-primary mt-3">Confirmar</button>
+            <button :disabled="!rating" @click="confirmReview" class="btn btn-primary mt-3">Confirmar</button>
         </div>
     </div>
 </template>
@@ -26,6 +26,7 @@
 import { defineComponent } from 'vue';
 import { useVuelidate } from '@vuelidate/core'
 import StarRating from 'vue-star-rating'
+import { Modal } from 'bootstrap';
 
 export default defineComponent({
     components: {
@@ -36,8 +37,31 @@ export default defineComponent({
     },
     data() {
         return {
-            rating: null
+            rating: null,
+            modalInstance: null as Modal | null,
         }
     },
+    methods: {
+        confirmReview() {
+            this.$store.commit('SET_SUCCESS_MODAL_MESSAGE', "Gracias por tu reseña");
+            this.showModal();
+            setTimeout(() => {
+                this.hideModal();
+                this.$router.push({name: 'MainView', query: { finished: 'y' }});
+            }, 2000)
+        },
+        showModal() {
+            this.modalInstance?.show()
+        },
+        hideModal() {
+            this.modalInstance?.hide()
+        }
+    },
+    mounted() {
+        const modalElement = document.getElementById('successModal');
+        if (modalElement && modalElement instanceof Element) {
+            this.modalInstance = new Modal(modalElement)
+        }
+    }
 })
 </script>
