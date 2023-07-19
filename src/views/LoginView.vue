@@ -57,8 +57,8 @@ export default defineComponent({
     },
     data() {
         return {
-            username: 'cd16-2204@unphu.edu.do',
-            password: 'admin123',
+            username: 'hg15-2222@unphu.edu.do',
+            password: 'admin123admin123',
             isLogin: true,
             errorMessage: '',
             signInErrorMessage: '',

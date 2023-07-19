@@ -19,17 +19,17 @@
                     <fa color="green" :icon="['fas', 'car-side']" /> | ¿Es Conductor? {{ isDriver ? 'Si' : 'No' }}
                 </p>
             </div>
-            <template v-if="!userData.driver">
-                <hr>
+        </div>
+        <template v-if="!userData.driver">
                 <button @click="registerDriver" :disabled="disableSendButton"
                     v-if="!disableSendButton && !userData.driverRequest" type="submit"
-                    :class="disableSendButton ? 'btn-secondary' : 'btn-primary'" class="btn ">Solicitar ser
+                    :class="disableSendButton ? 'btn-secondary' : 'btn-primary'" class="btn mt-3">Solicitar ser
                     conductor</button>
-                <p v-else-if="disableSendButton">Su solicitud para ser conductor ya fue enviada.</p>
+                
+                <button class="btn btn-success mt-3" v-else-if="disableSendButton">Su solicitud para ser conductor ya fue enviada.</button>
                 <p v-else-if="userData.driverRequest">Su solicitud (#{{ userData.driverRequest }}) para ser conductor está
                     pendiente.</p>
             </template>
-        </div>
     </div>
 </template>
 
