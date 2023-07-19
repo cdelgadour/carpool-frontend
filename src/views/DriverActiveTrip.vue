@@ -8,12 +8,10 @@
                         <div class="container">
                             <div class="row px-0">
                                 <p class="p-0 m-0 mb-0"><strong>Fecha y hora: </strong>{{ offsetDateTime }}</p>
-                                <p class="p-0 m-0 mb-0"><strong>Estado: </strong>En curso</p>
-                                <hr v-if="showCodeBttn" class="mb-2">
-                                <button @click="codeHasBeenSent = !codeHasBeenSent" v-if="showCodeBttn" class="mb-2 btn btn-primary">{{ codeHasBeenSent ? 'Reenviar' : 'Enviar' }} código de seguridad</button>
-                                <p v-if="codeHasBeenSent" class="m-0 p-0">Introduce el código enviado al pasajero</p>
-                                <input v-if="codeHasBeenSent" type="text">
-                                <hr v-if="showCodeBttn">
+                                <p class="p-0 m-0 mb-2"><strong>Estado: </strong>En curso</p>
+                                <hr class="my-2 mb-3" v-if="showCodeBttn && !showCompletedPassenger">
+                                <button @click="finishTrip" v-if="showFinishButton" class="mb-0 btn btn-primary animate__animated animate__pulse">Finalizar viaje</button>
+                                <button @click="codeHasBeenSent = !codeHasBeenSent" v-if="showCodeBttn && !showCompletedPassenger" class="mb-0 btn btn-primary">{{ codeHasBeenSent ? 'Reenviar' : 'Enviar' }} código de seguridad</button>
                             </div>
                         </div>
                     </div>
@@ -21,16 +19,20 @@
                 </div>
             </div> 
         </div>
-        <hr>
-        <div v-if="passengersConfirmed" class="row align-items-center">
+        <div class="row align-items-center">
+            <hr class="m-3">
             <div class="col-7">
                 <p class="mb-0"><strong>Francis Nuñez (FN)</strong></p>
             </div>
             <div class="col-5 d-flex justify-content-end">
-                <button class="btn btn-secondary mr-5">
-                    Pendiente
+                <button :class="{
+                    'btn-secondary': !showCompletedPassenger,
+                    'btn-success': showCompletedPassenger}" 
+                    class="btn mr-5">
+                    {{ showCompletedPassenger ? 'Confirmado' : 'Pendiente'}} 
                 </button>
             </div>
+            <hr class="m-2">
         </div>
         <div class="row">
             <div class="col-md-12">
@@ -56,19 +58,29 @@
             </div>
         </div>
         
-        <div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal fade" id="confirmPassengerModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLongTitle">Confirmar</h5>
                 </div>
-                <div class="modal-body">
-                    {{ routeConfirmModalMsg }}
+                <div class="modal-body text-center">
+                    <Loading
+                        :active="showLoading"
+                        :is-full-page="false"
+                        ></Loading>
+                        <div v-if="showSuccessIcon && !showLoading">
+                            <img style="width: 75px" src="~@/assets/success-35.png" alt="">
+                        </div>
+                        <div v-else>
+                            <p>Introduce el código de seguridad enviado al pasajero</p>
+                            <input type="text" v-model="passengerTwoFactor">
+                        </div>
                 </div>
-                <div class="modal-footer">
+                <div class="modal-footer" v-if="!showSuccessIcon && !showLoading">
                     <button type="button" v-if="!routeCreationError" @click="hideModal" class="btn btn-danger" data-dismiss="modal">Cancelar</button>
                     <button type="button" v-if="routeCreationError" @click="initialState" class="btn btn-primary">Confirmar</button>
-                    <button type="button" v-if="!routeCreationError" @click="saveData" class="btn btn-primary">Confirmar</button>
+                    <button type="button" v-if="!routeCreationError" @click="saveData" class="btn btn-primary">Reenviar</button>
                 </div>
                 </div>
             </div>
@@ -95,8 +107,12 @@ import { Modal } from 'bootstrap';
 import polyline from '@mapbox/polyline';
 import type { AddressSuggestion, SelectedPoint, Route, Trip, NamedChoices } from '@/models/CommonModels';
 import type { Point } from '@turf/helpers'
+import Loading from 'vue-loading-overlay'
 
 export default defineComponent({
+    components: {
+        Loading
+    },
     data() {
         return {
             chosenDate: null,
@@ -104,6 +120,7 @@ export default defineComponent({
             userSelectedPoint: {} as Feature,
             constructedRoute: {} as Route,
             map: {} as mapboxgl.Map,
+            passengerMarker: null as any,
             originPointText: '',
             sessionToken: '5a057974-f75c-47e1-912e-75f5d0832626',
             accessToken: 'pk.eyJ1IjoiY2RlbGdhZG91bnBodSIsImEiOiJjbGVhcmV1eDgwOXU0M3BvZDB6b3UwaW5kIn0.9AuJG-JNVlHwoSH9C8Pr2A',
@@ -117,11 +134,16 @@ export default defineComponent({
             showCodeBttn: false,
             animationSteps: 151,
             animationCounter: 0,
+            showCompletedPassenger: false,
+            showSuccessIcon: false,
+            showLoading: false,
             animationRoute: {},
             animationPoint: {},
             adviceMessage: '',
             lastCallTime: 0,
             showCodeInput: false,
+            showFinishButton: false,
+            passengerTwoFactor: '',
             animationPointCollection: {},
             dummy: {"type":"Feature","geometry":{"type":"Point","coordinates":[-69.95846109686937,18.468832583600875]},"properties":{"featureIndex":50,"distanceToPoint":0.07576463364933643}}
         }
@@ -179,9 +201,40 @@ export default defineComponent({
         },
         userSelectedMarker(value) {
             this.calculateMarkerToNearestPoint();
+        },
+        codeHasBeenSent(value: boolean) {
+            if (value) {
+                this.showModal();
+            }
+        },
+        passengerTwoFactor(value: string) {
+            if (value.length == 6) {
+                this.showLoading = true;
+                var f = this.hideModal;
+                var a = this.animate;
+                setTimeout(() => {
+                    this.showSuccessIcon = true;
+                    this.showLoading = false;
+                    setTimeout(() => {
+                        f();
+                        this.showCompletedPassenger = true;
+                        this.animationCounter = 41;
+                        requestAnimationFrame(a);
+                    }, 1000)
+                }, 2000)
+            }
         }
     },
     methods:{
+        setPredefinedRoute() {
+            this.passengerMarker = new mapboxgl.Marker()
+                .setLngLat([-69.95864230430901, 18.465757870799152])
+                .setPopup(new mapboxgl.Popup().setHTML("<h3>FN</h3>"))
+                                            .addTo(this.map);
+            this.passengerMarker.togglePopup();
+            // this.passengerMarker.getElement().textContent = 'FN';
+             
+        },
         getOriginDestinationPoints() {
             if (this.selectedTrip && Object.keys(this.map).length) {
                 const steps = this.selectedTrip.route[0].legs[0].steps;
@@ -223,6 +276,7 @@ export default defineComponent({
                     }
                 ]
             };
+            
             const geoPoint = {
                     'type': 'Feature',
                     'properties': {},
@@ -244,7 +298,7 @@ export default defineComponent({
             }
 
             route.features[0].geometry.coordinates = arc;
-
+            this.setPredefinedRoute();
             let counter = 0;
             // this.animationPointCollection = route;
             this.animationPoint = geoPoint;
@@ -276,7 +330,7 @@ export default defineComponent({
         },
         animate(time: number) {
             var delay = 1000 / 20;
-            if (this.animationCounter == 42) {
+            if (this.animationCounter == 40) {
                 this.showCodeBttn = !this.showCodeBttn
                 // this.adviceMessage = 'Te hemos enviado el código de seguridad, por favor pasarlo al conductor.'
                 // this.$notify({
@@ -302,12 +356,16 @@ export default defineComponent({
                 this.map.getSource('animation-point').setData(this.animationPoint);
                 this.animationCounter = this.animationCounter + 1;
             } else {
-                this.$store.commit('SET_IS_LOADING', true);
-                setTimeout(() => {
-                    this.$router.push({ name: 'UserFinishedTrip' })
-                }, 2000)
+                this.showFinishButton = true;
+                
             }
             
+        },
+        finishTrip() {
+            this.$store.commit('SET_IS_LOADING', true);
+                setTimeout(() => {
+                    this.$router.push({ name: 'DriverFinishedTrip' })
+                }, 2000)
         },
         addLayer() {
             this.map.addLayer({
@@ -398,7 +456,7 @@ export default defineComponent({
             this.$router.push({ name: 'DriverRouteList' })
         },
         hideModal() {
-            const modalElement = document.getElementById('confirmModal');
+            const modalElement = document.getElementById('confirmPassengerModal');
             this.modalInstance?.hide()
         },
         obtainCurrentLocation() {
@@ -442,11 +500,10 @@ export default defineComponent({
         this.$store.dispatch('getUserTrips')
         this.$store.dispatch('getDriverTrips')
         // this.$store.commit('SET_IS_LOADING', true);
-        const modalElement = document.getElementById('confirmModal');
+        const modalElement = document.getElementById('confirmPassengerModal');
         if (modalElement && modalElement instanceof Element) {
             this.modalInstance = new Modal(modalElement)
-        }
-        
+        }        
         this.loadMap();
     }
 })
