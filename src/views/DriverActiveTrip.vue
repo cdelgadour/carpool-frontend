@@ -9,7 +9,7 @@
                             <div class="row px-0">
                                 <p class="p-0 m-0 mb-0"><strong>Fecha y hora: </strong>{{ offsetDateTime }}</p>
                                 <p class="p-0 m-0 mb-2"><strong>Estado: </strong>En curso</p>
-                                <hr class="my-2 mb-3" v-if="showCodeBttn && !showCompletedPassenger">
+                                <hr :class="{ 'mb-3' : showFinishButton, 'mb-2': !showFinishButton}" class="my-2 mb-3" v-if="showCodeBttn && !showCompletedPassenger">
                                 <button @click="finishTrip" v-if="showFinishButton" class="mb-0 btn btn-primary animate__animated animate__pulse">Finalizar viaje</button>
                                 <button @click="codeHasBeenSent = !codeHasBeenSent" v-if="showCodeBttn && !showCompletedPassenger" class="mb-0 btn btn-primary">{{ codeHasBeenSent ? 'Reenviar' : 'Enviar' }} código de seguridad</button>
                             </div>
@@ -20,7 +20,7 @@
             </div> 
         </div>
         <div class="row align-items-center">
-            <hr class="m-3">
+            <hr class="mx-0 mt-3 mb-2">
             <div class="col-7">
                 <p class="mb-0"><strong>Francis Nuñez (FN)</strong></p>
             </div>
@@ -32,7 +32,7 @@
                     {{ showCompletedPassenger ? 'Confirmado' : 'Pendiente'}} 
                 </button>
             </div>
-            <hr class="m-2">
+            <hr class="mx-0 my-2">
         </div>
         <div class="row">
             <div class="col-md-12">

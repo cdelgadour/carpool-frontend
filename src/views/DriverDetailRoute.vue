@@ -20,6 +20,7 @@
         <div v-if="!passengersConfirmed" class="row align-items-center">
             <div class="col-7">
                 <p class="mb-0"><strong>Francis Nuñez (FN)</strong></p>
+                <span><StarRating v-model:rating="rating" :star-size="15" ></StarRating></span>
             </div>
             <div class="col-5 d-flex justify-content-end">
                 <button @click="confirmPassenger" class="btn btn-primary mr-5">
@@ -33,6 +34,7 @@
         <div v-if="passengersConfirmed" class="row align-items-center">
             <div class="col-7">
                 <p class="mb-0"><strong>Francis Nuñez (FN)</strong></p>
+                <span><StarRating v-model:rating="rating" :star-size="15" ></StarRating></span>
             </div>
             <div class="col-5 d-flex justify-content-end">
                 <button @click="confirmPassenger" class="btn btn-success mr-5">
@@ -92,10 +94,15 @@ import { Modal } from 'bootstrap';
 import polyline from '@mapbox/polyline';
 import type { AddressSuggestion, SelectedPoint, Route, Trip, NamedChoices } from '@/models/CommonModels';
 import type { Point } from '@turf/helpers'
+import StarRating from 'vue-star-rating'
 
 export default defineComponent({
+    components: {
+        StarRating
+    },
     data() {
         return {
+            rating: 4,
             chosenDate: null,
             userSelectedMarker: {} as mapboxgl.Marker,
             userSelectedPoint: {} as Feature,
